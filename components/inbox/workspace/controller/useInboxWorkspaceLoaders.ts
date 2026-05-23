@@ -59,7 +59,7 @@ type LoadConversationsOptions = {
 
 const CONVERSATION_PAGE_LIMIT = 20;
 const MESSAGE_PAGE_LIMIT = 30;
-const REALTIME_FALLBACK_POLL_INTERVAL_MS = 5_000;
+const REALTIME_FALLBACK_POLL_INTERVAL_MS = 8_000;
 
 export function useInboxWorkspaceLoaders(state: InboxWorkspaceState) {
   const {
@@ -1206,6 +1206,9 @@ export function useInboxWorkspaceLoaders(state: InboxWorkspaceState) {
 
       fallbackTimer = setInterval(() => {
         if (!active) {
+          return;
+        }
+        if (document.visibilityState !== "visible") {
           return;
         }
 

@@ -193,8 +193,25 @@ function PublicLayout({ pathname, children }: { pathname: string; children: Reac
         ref={headerRef}
         className="landing-header fixed left-0 right-0 top-0 z-50 flex h-20 items-center justify-between px-6 transition-all duration-500 md:px-12"
       >
-        <Link className="text-lg font-black tracking-tighter text-foreground" href="/">
-          20byte.
+        <Link className="inline-flex items-center" href="/">
+          <Image
+            src="/branding/20byte-logo-dark.svg"
+            alt="20byte"
+            width={168}
+            height={52}
+            className="h-8 w-auto object-contain dark:hidden"
+            unoptimized
+            priority
+          />
+          <Image
+            src="/branding/20byte-logo-light.svg"
+            alt="20byte"
+            width={168}
+            height={52}
+            className="hidden h-8 w-auto object-contain dark:block"
+            unoptimized
+            priority
+          />
         </Link>
         <div className="flex items-center gap-4">
           <ThemeToggle />

@@ -580,7 +580,14 @@ async function resolveOutboundDestinationJid(
 ): Promise<string> {
   const normalizedPreferredJid = jidNormalizedUser(preferredJid ?? undefined);
   if (normalizedPreferredJid) {
-    return normalizedPreferredJid;
+    if (isLidUser(normalizedPreferredJid) || isHostedLidUser(normalizedPreferredJid)) {
+      const mappedPnJid = await resolvePnJidFromLid(orgId, normalizedPreferredJid, socket);
+      if (mappedPnJid) {
+        return mappedPnJid;
+      }
+    } else {
+      return normalizedPreferredJid;
+    }
   }
 
   const directJid = toJid(toPhoneE164);
@@ -2092,30 +2099,40 @@ export async function listBaileysRuntimeMedia(orgId: string): Promise<string[]> 
 
 export async function readBaileysMediaFile(orgId: string, fileName: string): Promise<Buffer> {
   const safeFileName = path.basename(fileName);
-  const diskPath = path.join(getMediaFolder(orgId), safeFileName);
-  let fileStats;
-  try {
-    fileStats = await stat(diskPath);
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException | null)?.code;
-    if (code === "ENOENT" || code === "ENOTDIR") {
-      throw new ServiceError(404, "MEDIA_FILE_NOT_FOUND", "Media file does not exist.");
+  const candidatePaths = [
+    path.join(getMediaFolder(orgId), safeFileName),
+    // Backward-compat: media lama pernah tersimpan tanpa subfolder org.
+    path.join(BAILEYS_MEDIA_DIR, safeFileName)
+  ];
+
+  for (const diskPath of candidatePaths) {
+    let fileStats;
+    try {
+      fileStats = await stat(diskPath);
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException | null)?.code;
+      if (code === "ENOENT" || code === "ENOTDIR") {
+        continue;
+      }
+      throw error;
     }
-    throw error;
-  }
-  if (!fileStats.isFile()) {
-    throw new ServiceError(404, "MEDIA_FILE_NOT_FOUND", "Media file does not exist.");
+
+    if (!fileStats.isFile()) {
+      continue;
+    }
+
+    try {
+      return await readFile(diskPath);
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException | null)?.code;
+      if (code === "ENOENT" || code === "ENOTDIR") {
+        continue;
+      }
+      throw error;
+    }
   }
 
-  try {
-    return await readFile(diskPath);
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException | null)?.code;
-    if (code === "ENOENT" || code === "ENOTDIR") {
-      throw new ServiceError(404, "MEDIA_FILE_NOT_FOUND", "Media file does not exist.");
-    }
-    throw error;
-  }
+  throw new ServiceError(404, "MEDIA_FILE_NOT_FOUND", "Media file does not exist.");
 }
 
 export async function writeBaileysAuditLog(actorUserId: string, orgId: string, action: string, entityId: string, meta?: Record<string, unknown>) {
@@ -2132,7 +2149,8 @@ export async function writeBaileysAuditLog(actorUserId: string, orgId: string, a
 const shouldBootstrapBaileysSessions =
   process.env.NODE_ENV !== "test" &&
   process.env.NEXT_PHASE !== "phase-production-build" &&
-  process.env.DISABLE_BAILEYS_BOOTSTRAP !== "1";
+  process.env.DISABLE_BAILEYS_BOOTSTRAP !== "1" &&
+  process.env.WHATSAPP_MOCK_MODE !== "true";
 
 if (shouldBootstrapBaileysSessions) {
   void bootstrapConnectedBaileysSessions();

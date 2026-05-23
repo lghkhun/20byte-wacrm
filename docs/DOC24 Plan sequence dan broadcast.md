@@ -1,0 +1,181 @@
+# DOC 24 — WhatsApp Sequence, Follow-up, and Broadcast Engine
+
+## Summary
+- Bangun unified engine untuk `sequence/follow-up` dan `broadcast` WhatsApp, tetapi dipisah sebagai module baru di produk, bukan ditumpuk ke `AI & Automation` atau `Settings WhatsApp`.
+- V1 fokus pada `lead/inbox lifecycle`, sumber audience hanya dari CRM existing, mendukung `manual + auto enrollment`, dan outbound `template + text`.
+- Delivery path tetap bisa memakai Baileys, tetapi produk harus memaksa `guardrail compliance` sebelum job boleh dikirim.
+
+## Product Shape
+- Tambah sidebar/module baru bernama `Campaign`.
+- Route utama:
+  - `/whatsapp-campaigns`
+  - Tab `Sequences`
+  - Tab `Broadcast`
+  - Tab `Recipients`
+  - Tab `Analytics`
+- Sequence builder pakai model `rules + branches`:
+  - `Trigger -> Entry conditions -> Steps -> Per-step stop conditions -> Exit rules`
+  - Step minimal V1:
+    - `Delay`
+    - `Send template`
+    - `Send text`
+    - `Condition branch`
+    - `Wait until event/deadline`
+    - `Stop sequence`
+- Broadcast builder tetap memakai engine/job yang sama, tetapi entry mode-nya batch audience, bukan event enrollment.
+- Enrollment sequence mendukung:
+  - otomatis dari event inbox/CRM
+  - manual dari halaman CRM/inbox customer/conversation
+- Recipient source V1 hanya dari data existing:
+  - `Customer`
+  - `Conversation`
+  - `Tag`
+  - `followUpStatus`
+  - `assigned CS`
+  - `campaign/sourceCampaign`
+- Analytics V1 fokus delivery funnel:
+  - enrolled
+  - queued
+  - sent
+  - failed
+  - replied
+  - stopped
+  - skipped by guardrail
+  - opt-out / do-not-send
+
+## Implementation Changes
+- Data model:
+  - Pertahankan `AiAutomation` apa adanya untuk AI.
+  - Tambah model baru khusus WA campaign engine, jangan overload `AiAutomation`.
+  - Tambah entitas inti:
+    - `WhatsAppFlow`
+    - `WhatsAppFlowNode`
+    - `WhatsAppFlowEdge`
+    - `WhatsAppEnrollment`
+    - `WhatsAppExecution`
+    - `WhatsAppBroadcast`
+    - `WhatsAppBroadcastRecipient`
+    - `WhatsAppComplianceEvent`
+    - `WhatsAppSuppression`
+  - Tambah enum baru untuk:
+    - trigger event lead/inbox
+    - node type
+    - execution status
+    - recipient status
+    - stop reason
+    - channel mode (`TEMPLATE`, `TEXT`)
+- Engine and queues:
+  - Tambah worker/queue baru terpisah dari `whatsappPublicScheduleQueue`.
+  - Satu orchestrator untuk:
+    - consume event inbox/CRM
+    - create enrollment
+    - evaluate branch
+    - schedule next step
+    - enqueue outbound send
+  - Broadcast memakai execution pipeline yang sama, tapi dengan recipient fan-out batch.
+- Trigger integration:
+  - Hook dari event existing:
+    - chat masuk
+    - customer reply
+    - conversation status berubah
+    - tag customer berubah
+    - assignee berubah
+    - followUp field berubah
+  - Manual enrollment endpoint dari CRM/inbox action.
+- Guardrail compliance:
+  - Sebelum kirim, engine wajib evaluasi:
+    - nomor valid dan conversation/customer masih eligible
+    - suppression / opt-out tidak aktif
+    - duplicate send cooldown belum dilanggar
+    - text hanya boleh jika policy runtime mengizinkan
+    - di luar rule aman, paksa fallback ke template atau block
+  - Semua block/skipped reason harus tercatat di audit/compliance event.
+- API and UI:
+  - Tambah CRUD API untuk flow, node, edge, enrollment, broadcast draft, launch, pause, resume, cancel.
+  - Tambah preview evaluator untuk menampilkan outcome rule pada sample customer/conversation.
+  - Tambah action cepat di inbox/CRM:
+    - enroll ke sequence
+    - stop sequence
+    - lihat status step aktif
+    - tambah ke suppression list
+- Reporting:
+  - Tambah endpoint analytics funnel per flow/broadcast.
+  - Tambah breakdown:
+    - per step
+    - per status
+    - per template/text
+    - per trigger source
+
+## Public Interfaces
+- Route/module baru:
+  - `/whatsapp-campaigns`
+- API internal baru:
+  - `GET/POST/PATCH/DELETE /api/whatsapp/flows`
+  - `POST /api/whatsapp/flows/:id/enroll`
+  - `POST /api/whatsapp/flows/:id/pause`
+  - `POST /api/whatsapp/flows/:id/resume`
+  - `POST /api/whatsapp/flows/:id/stop`
+  - `GET/POST/PATCH/DELETE /api/whatsapp/broadcasts`
+  - `POST /api/whatsapp/broadcasts/:id/launch`
+  - `POST /api/whatsapp/broadcasts/:id/cancel`
+  - `GET /api/whatsapp/analytics/campaigns`
+- Prisma/type additions:
+  - flow definition types
+  - execution log types
+  - compliance result types
+  - recipient funnel summary types
+- Existing inbox/CRM payload perlu ditambah field ringkas:
+  - active sequence count
+  - current flow step
+  - suppression status
+
+## Delivery Plan
+- Phase 1:
+  - schema baru
+  - worker + queue execution dasar
+  - flow CRUD
+  - manual enrollment
+  - template send only path
+  - analytics funnel dasar
+- Phase 2:
+  - auto-enrollment dari inbox lifecycle
+  - branch engine
+  - text send dengan compliance gate
+  - suppression management
+  - inbox/CRM quick actions
+- Phase 3:
+  - broadcast launch UX
+  - batching/throttling
+  - analytics per step dan per recipient
+  - pause/resume/cancel controls
+
+## Test Plan
+- Unit:
+  - branch evaluation
+  - per-step stop condition
+  - compliance gate decision
+  - duplicate cooldown
+  - suppression lookup
+  - enrollment dedupe
+- Integration:
+  - inbound chat membuat auto-enrollment
+  - manual enroll dari CRM/inbox
+  - reply customer menghentikan step sesuai rule
+  - broadcast launch membuat recipient jobs tanpa duplikasi
+  - template send lolos, text send diblok saat policy tidak aman
+  - pause/resume/cancel tidak membuat orphan job
+- E2E/UI:
+  - buat sequence bercabang
+  - enroll customer dari inbox
+  - luncurkan broadcast ke segment CRM
+  - lihat funnel analytics dan alasan failed/skipped
+- Non-functional:
+  - idempotency worker
+  - retry aman tanpa double send
+  - visibility log untuk audit incident
+
+## Assumptions
+- Broadcast dan sequence tidak memakai `AiAutomation`; modul AI tetap terpisah.
+- Recipient import file tidak masuk V1.
+- Media campaign tidak masuk V1; hanya `template + text`.
+- Rollout langsung ke semua org, jadi feature flag hanya dipakai sebagai emergency kill switch internal, bukan beta gating.

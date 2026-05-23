@@ -16,7 +16,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { Activity, RefreshCw, Users, UserRoundSearch, Wallet } from "lucide-react";
+import { Activity, Bot, RefreshCw, Send, Users, UserRoundSearch, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { DashboardDateRangePicker } from "@/components/dashboard/dashboard-date-range-picker";
@@ -25,7 +25,7 @@ import { ChartContainer, type ChartConfig } from "@/components/ui/chart";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-type TabValue = "leads" | "customers";
+type TabValue = "leads" | "customers" | "campaign";
 
 const palette = ["#2563eb", "#7c3aed", "#10b981", "#f59e0b", "#22c55e", "#64748b", "#14b8a6", "#e11d48"];
 
@@ -45,6 +45,28 @@ type CustomerDetailRow = {
   projectValueCents: number;
   assignee: string;
   notes: string | null;
+};
+
+type CampaignSequenceByFlow = {
+  flowId: string;
+  flowName: string;
+  enrolled: number;
+  completed: number;
+  failed: number;
+};
+
+type CampaignBroadcastByName = {
+  broadcastId: string;
+  broadcastName: string;
+  sent: number;
+  failed: number;
+  skipped: number;
+};
+
+type CampaignRuleByAction = {
+  actionType: string;
+  executed: number;
+  failed: number;
 };
 
 type ReportPayload = {
@@ -77,6 +99,45 @@ type ReportPayload = {
       totalProjectValueCents: number;
       details: CustomerDetailRow[];
     };
+    campaign: {
+      sequence: {
+        enrolled: number;
+        activeEnrollments: number;
+        completed: number;
+        stopped: number;
+        failed: number;
+        queuedExecutions: number;
+        sentExecutions: number;
+        failedExecutions: number;
+        skippedExecutions: number;
+        executionOutcome: DistributionItem[];
+        sequenceByFlow: CampaignSequenceByFlow[];
+      };
+      broadcast: {
+        launched: number;
+        running: number;
+        completed: number;
+        canceled: number;
+        pendingRecipients: number;
+        queuedRecipients: number;
+        sentRecipients: number;
+        failedRecipients: number;
+        skippedRecipients: number;
+        stoppedRecipients: number;
+        recipientOutcome: DistributionItem[];
+        broadcastByName: CampaignBroadcastByName[];
+      };
+      rules: {
+        evaluated: number;
+        skipped: number;
+        actionExecuted: number;
+        actionFailed: number;
+        didntReadScheduled: number;
+        didntReadTriggered: number;
+        didntReadCanceled: number;
+        rulesByActionType: CampaignRuleByAction[];
+      };
+    };
   };
   error?: {
     message?: string;
@@ -94,7 +155,9 @@ function toDateParam(date: Date): string {
 }
 
 function parseTab(raw: string | undefined): TabValue {
-  return raw === "customers" ? "customers" : "leads";
+  if (raw === "customers") return "customers";
+  if (raw === "campaign") return "campaign";
+  return "leads";
 }
 
 function formatDuration(sec: number): string {
@@ -411,6 +474,105 @@ function CustomerDetailsTable({ rows }: { rows: CustomerDetailRow[] }) {
   );
 }
 
+function TopSequencesTable({ rows }: { rows: CampaignSequenceByFlow[] }) {
+  return (
+    <article className="rounded-2xl border border-border/50 bg-card/40 p-4 md:p-5">
+      <h3 className="text-sm font-bold tracking-tight text-foreground">Top Sequences</h3>
+      <div className="mt-4 overflow-x-auto">
+        <table className="min-w-[720px] w-full text-xs">
+          <thead>
+            <tr className="border-b border-border/60 text-left text-muted-foreground">
+              <th className="px-2 py-2">Sequence</th>
+              <th className="px-2 py-2">Enrolled</th>
+              <th className="px-2 py-2">Completed</th>
+              <th className="px-2 py-2">Failed</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-2 py-6 text-center text-muted-foreground">No data available</td>
+              </tr>
+            ) : (
+              rows.slice(0, 10).map((row) => (
+                <tr key={row.flowId} className="border-b border-border/30 align-top">
+                  <td className="px-2 py-2 font-medium text-foreground">{row.flowName}</td>
+                  <td className="px-2 py-2">{row.enrolled}</td>
+                  <td className="px-2 py-2">{row.completed}</td>
+                  <td className="px-2 py-2">{row.failed}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  );
+}
+
+function TopBroadcastsTable({ rows }: { rows: CampaignBroadcastByName[] }) {
+  return (
+    <article className="rounded-2xl border border-border/50 bg-card/40 p-4 md:p-5">
+      <h3 className="text-sm font-bold tracking-tight text-foreground">Top Broadcasts</h3>
+      <div className="mt-4 overflow-x-auto">
+        <table className="min-w-[720px] w-full text-xs">
+          <thead>
+            <tr className="border-b border-border/60 text-left text-muted-foreground">
+              <th className="px-2 py-2">Broadcast</th>
+              <th className="px-2 py-2">Sent</th>
+              <th className="px-2 py-2">Failed</th>
+              <th className="px-2 py-2">Skipped</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-2 py-6 text-center text-muted-foreground">No data available</td>
+              </tr>
+            ) : (
+              rows.slice(0, 10).map((row) => (
+                <tr key={row.broadcastId} className="border-b border-border/30 align-top">
+                  <td className="px-2 py-2 font-medium text-foreground">{row.broadcastName}</td>
+                  <td className="px-2 py-2">{row.sent}</td>
+                  <td className="px-2 py-2">{row.failed}</td>
+                  <td className="px-2 py-2">{row.skipped}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  );
+}
+
+function RulesRuntimeHealthPanel({
+  evaluated,
+  actionFailed,
+  didntReadScheduled,
+  didntReadTriggered,
+  didntReadCanceled
+}: {
+  evaluated: number;
+  actionFailed: number;
+  didntReadScheduled: number;
+  didntReadTriggered: number;
+  didntReadCanceled: number;
+}) {
+  return (
+    <article className="rounded-2xl border border-border/50 bg-card/40 p-4 md:p-5">
+      <h3 className="text-sm font-bold tracking-tight text-foreground">Rules Runtime Health</h3>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <div className="rounded-xl border border-border/60 p-3"><p className="text-xs text-muted-foreground">Evaluated</p><p className="text-xl font-semibold">{evaluated}</p></div>
+        <div className="rounded-xl border border-border/60 p-3"><p className="text-xs text-muted-foreground">Action Failed</p><p className="text-xl font-semibold">{actionFailed}</p></div>
+        <div className="rounded-xl border border-border/60 p-3"><p className="text-xs text-muted-foreground">DidntRead Scheduled</p><p className="text-xl font-semibold">{didntReadScheduled}</p></div>
+        <div className="rounded-xl border border-border/60 p-3"><p className="text-xs text-muted-foreground">DidntRead Triggered</p><p className="text-xl font-semibold">{didntReadTriggered}</p></div>
+        <div className="rounded-xl border border-border/60 p-3"><p className="text-xs text-muted-foreground">DidntRead Canceled</p><p className="text-xl font-semibold">{didntReadCanceled}</p></div>
+      </div>
+    </article>
+  );
+}
+
 export function ReportWorkspace({
   initialTab,
   initialFrom,
@@ -473,6 +635,7 @@ export function ReportWorkspace({
 
   const leadsData = payload?.leads;
   const customersData = payload?.customers;
+  const campaignData = payload?.campaign;
 
   function handleTabChange(nextTab: string) {
     const value = parseTab(nextTab);
@@ -491,7 +654,7 @@ export function ReportWorkspace({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold tracking-tight text-foreground md:text-2xl">Report</h1>
-            <p className="text-xs text-muted-foreground">Leads & Customers analytics berdasarkan data existing.</p>
+            <p className="text-xs text-muted-foreground">Leads, Customers, dan Campaign operations analytics berdasarkan data runtime.</p>
           </div>
           <div className="flex items-center gap-2">
             <DashboardDateRangePicker from={from} to={to} />
@@ -502,9 +665,10 @@ export function ReportWorkspace({
         </div>
 
         <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 rounded-xl border border-border/60 bg-muted/30 p-1">
+          <TabsList className="grid w-full grid-cols-3 rounded-xl border border-border/60 bg-muted/30 p-1">
             <TabsTrigger value="leads" className="rounded-lg">Leads</TabsTrigger>
             <TabsTrigger value="customers" className="rounded-lg">Customers</TabsTrigger>
+            <TabsTrigger value="campaign" className="rounded-lg">Campaign</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -540,7 +704,7 @@ export function ReportWorkspace({
 
             <DistributionBarChart title="Business Category" data={leadsData.businessCategory} />
           </>
-        ) : customersData ? (
+        ) : tab === "customers" && customersData ? (
           <>
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <SummaryCard title="Total Customers" value={String(customersData.total)} icon={Users} />
@@ -568,6 +732,47 @@ export function ReportWorkspace({
 
             <DistributionBarChart title="Business Category" data={customersData.businessCategory} />
             <CustomerDetailsTable rows={customersData.details} />
+          </>
+        ) : campaignData ? (
+          <>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <SummaryCard title="Sequence Enrolled" value={String(campaignData.sequence.enrolled)} icon={Users} />
+              <SummaryCard title="Broadcast Launched" value={String(campaignData.broadcast.launched)} icon={Send} />
+              <SummaryCard title="Rules Evaluated" value={String(campaignData.rules.evaluated)} icon={Bot} />
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <SummaryCard title="Sequence Sent Exec" value={String(campaignData.sequence.sentExecutions)} icon={Activity} />
+              <SummaryCard title="Sequence Failed Exec" value={String(campaignData.sequence.failedExecutions)} icon={Activity} />
+              <SummaryCard title="Broadcast Sent" value={String(campaignData.broadcast.sentRecipients)} icon={Activity} />
+              <SummaryCard title="Rule Action Failed" value={String(campaignData.rules.actionFailed)} icon={Activity} />
+            </div>
+
+            <div className="grid gap-4 xl:grid-cols-2">
+              <DistributionBarChart title="Execution Outcome" data={campaignData.sequence.executionOutcome} />
+              <DistributionDonutChart title="Broadcast Recipient Outcome" data={campaignData.broadcast.recipientOutcome} />
+            </div>
+
+            <div className="grid gap-4 xl:grid-cols-2">
+              <TopSequencesTable rows={campaignData.sequence.sequenceByFlow} />
+              <TopBroadcastsTable rows={campaignData.broadcast.broadcastByName} />
+            </div>
+
+            <RulesRuntimeHealthPanel
+              evaluated={campaignData.rules.evaluated}
+              actionFailed={campaignData.rules.actionFailed}
+              didntReadScheduled={campaignData.rules.didntReadScheduled}
+              didntReadTriggered={campaignData.rules.didntReadTriggered}
+              didntReadCanceled={campaignData.rules.didntReadCanceled}
+            />
+
+            <DistributionBarChart
+              title="Rules Actions Outcome"
+              data={campaignData.rules.rulesByActionType.map((item) => ({
+                label: item.actionType,
+                value: item.executed + item.failed
+              }))}
+            />
           </>
         ) : null}
       </div>

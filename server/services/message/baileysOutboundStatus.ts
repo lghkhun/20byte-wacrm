@@ -2,6 +2,7 @@ import { WAMessageStatus } from "baileys";
 
 import { publishConversationUpdatedEvent } from "@/lib/ably/publisher";
 import { updateOutboundDeliveryStatusByWaMessageId } from "@/server/services/message/outboundInfra/persistence";
+import { processCampaignReadEvent } from "@/server/services/whatsappCampaignService";
 
 export type BaileysOutboundStatusUpdate = {
   key?: {
@@ -72,6 +73,15 @@ export async function processBaileysOutboundStatusUpdate(
 
   if (!updated) {
     return null;
+  }
+
+  if (deliveryStatus === "READ") {
+    await processCampaignReadEvent({
+      orgId,
+      conversationId: updated.conversationId,
+      messageId: updated.messageId,
+      waMessageId
+    });
   }
 
   void publishConversationUpdated({

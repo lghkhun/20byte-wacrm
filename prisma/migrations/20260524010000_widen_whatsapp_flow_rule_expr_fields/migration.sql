@@ -1,0 +1,3 @@
+ALTER TABLE `WhatsAppFlowRule`
+  MODIFY `conditionExpr` LONGTEXT NOT NULL,
+  MODIFY `actionType` LONGTEXT NOT NULL;

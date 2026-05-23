@@ -6,6 +6,7 @@ const ADMIN_ASSIGNABLE_ROLES = new Set<Role>([Role.CS, Role.ADVERTISER]);
 const OWNER_MANAGEABLE_ROLES = new Set<Role>([Role.OWNER, Role.ADMIN, Role.CS, Role.ADVERTISER]);
 const ADMIN_MANAGEABLE_ROLES = new Set<Role>([Role.CS, Role.ADVERTISER]);
 const SETTINGS_ACCESS_ROLES = new Set<Role>([Role.OWNER, Role.ADMIN]);
+const AI_AUTOMATION_MANAGE_ROLES = new Set<Role>([Role.OWNER, Role.ADMIN]);
 const INBOX_ACCESS_ROLES = new Set<Role>([Role.OWNER, Role.ADMIN, Role.CS]);
 const CUSTOMER_DIRECTORY_ACCESS_ROLES = new Set<Role>([Role.OWNER, Role.ADMIN, Role.CS, Role.ADVERTISER]);
 
@@ -47,4 +48,8 @@ export function canAccessInbox(role: Role): boolean {
 
 export function canAccessCustomerDirectory(role: Role): boolean {
   return CUSTOMER_DIRECTORY_ACCESS_ROLES.has(role);
+}
+
+export function canManageAiAutomation(role: Role): boolean {
+  return AI_AUTOMATION_MANAGE_ROLES.has(role);
 }

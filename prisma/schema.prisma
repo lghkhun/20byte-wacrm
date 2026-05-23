@@ -159,59 +159,205 @@ enum PlatformCouponTarget {
   ALL
 }
 
+enum AiAgentRole {
+  SALES_ASSISTANT
+  CUSTOMER_SUPPORT
+  ADMIN_ASSISTANT
+  CUSTOM
+}
+
+enum AiAgentGoal {
+  ANSWER_QUESTION
+  COLLECT_LEAD
+  PUSH_TO_BUY
+  CLOSE_DEAL
+}
+
+enum AiTone {
+  FRIENDLY
+  CASUAL
+  PROFESSIONAL
+  PERSUASIVE
+}
+
+enum AiSalesMode {
+  SOFT_SELLING
+  HARD_SELLING
+  INFORMATIVE
+}
+
+enum AiKnowledgeType {
+  PRODUCT
+  FAQ
+  SOP
+  OBJECTION_HANDLING
+  CUSTOM
+}
+
+enum AiAutomationTrigger {
+  CHAT_INCOMING
+  NO_REPLY
+  INVOICE_CREATED
+  INVOICE_UNPAID
+  TAG_ADDED
+}
+
+enum AiAutomationConditionType {
+  CUSTOMER_TAG
+  INVOICE_STATUS
+  CONVERSATION_STATUS
+  NO_HUMAN_REPLY
+}
+
+enum AiAutomationActionType {
+  SEND_MESSAGE
+  SEND_AI_REPLY
+  STOP_AI_REPLY
+  SEND_INVOICE
+  ASSIGN_CS
+  NOTIFY_CS
+}
+
+enum AiUsageType {
+  AUTO_REPLY
+  SUGGESTED_REPLY
+  KNOWLEDGE_TEST
+  AUTOMATION
+}
+
+enum AiProvider {
+  OPENROUTER
+}
+
+enum WhatsAppFlowStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum WhatsAppFlowTriggerType {
+  MANUAL
+  CHAT_INCOMING
+}
+
+enum WhatsAppFlowNodeType {
+  SEND_TEMPLATE
+  SEND_TEXT
+  DELAY
+  STOP
+}
+
+enum WhatsAppEnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  STOPPED
+  FAILED
+}
+
+enum WhatsAppExecutionStatus {
+  QUEUED
+  SENT
+  FAILED
+  SKIPPED
+  STOPPED
+}
+
+enum WhatsAppExecutionStopReason {
+  FLOW_COMPLETED
+  MANUAL_STOP
+  TEMPLATE_ONLY_ENFORCED
+  ENROLLMENT_NOT_ACTIVE
+  CONVERSATION_NOT_FOUND
+  SEND_FAILED
+}
+
+enum WhatsAppBroadcastStatus {
+  DRAFT
+  RUNNING
+  COMPLETED
+  CANCELED
+}
+
+enum WhatsAppBroadcastRecipientStatus {
+  PENDING
+  QUEUED
+  SENT
+  FAILED
+  SKIPPED
+  STOPPED
+}
+
 model Org {
-  id                 String   @id @default(cuid())
-  name               String
-  legalName          String?
-  responsibleName    String?
-  businessPhone      String?
-  businessEmail      String?
-  businessNpwp       String?
-  businessAddress    String?  @db.Text
-  logoUrl            String?
+  id                  String   @id @default(cuid())
+  name                String
+  legalName           String?
+  responsibleName     String?
+  businessPhone       String?
+  businessEmail       String?
+  businessNpwp        String?
+  businessAddress     String?  @db.Text
+  logoUrl             String?
   invoiceSignatureUrl String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   // Future wallet placeholder (Phase 2+), keep for forward compatibility
-  walletBalanceCents Int      @default(0)
+  walletBalanceCents Int @default(0)
 
-  members            OrgMember[]
-  customers          Customer[]
-  customerTags       CustomerTag[]
-  customerNotes      CustomerNote[]
-  conversations      Conversation[]
-  messages           Message[]
-  invoices           Invoice[]
-  invoiceItems       InvoiceItem[]
-  paymentMilestones  PaymentMilestone[]
-  paymentProofs      PaymentProof[]
-  invoiceSequences   InvoiceSequence[]
-  tags               Tag[]
-  serviceCatalogItems ServiceCatalogItem[]
-  waAccounts         WaAccount[]
-  shortlinks         Shortlink[]
-  shortlinkClicks    ShortlinkClick[]
-  metaIntegrations   MetaIntegration[]
-  metaEventDispatches MetaEventDispatch[]
-  auditLogs          AuditLog[]
-  setupTokens        AccountSetupToken[]
-  subscription       OrgSubscription?
-  billingCharges     BillingCharge[]
-  plan               OrgPlan?
-  bankAccounts       OrgBankAccount[]
-  crmPipelines       CrmPipeline[]
-  crmPipelineStages  CrmPipelineStage[]
-  invoicePaymentSetting OrgInvoicePaymentSetting?
-  invoicePaymentAttempts InvoicePaymentAttempt[]
-  walletTopups       OrgWalletTopup[]
-  walletLedgers      OrgWalletLedger[]
-  walletWithdrawRequests OrgWalletWithdrawRequest[]
-  provisioningOrders OwnerBusinessProvisioningOrder[]
-  whatsappApiKey     OrgWhatsAppApiKey?
-  whatsappPublicWebhook OrgWhatsAppPublicWebhook?
-  whatsappPublicSchedules OrgWhatsAppPublicSchedule[]
+  members                     OrgMember[]
+  customers                   Customer[]
+  customerTags                CustomerTag[]
+  customerNotes               CustomerNote[]
+  conversations               Conversation[]
+  messages                    Message[]
+  invoices                    Invoice[]
+  invoiceItems                InvoiceItem[]
+  paymentMilestones           PaymentMilestone[]
+  paymentProofs               PaymentProof[]
+  invoiceSequences            InvoiceSequence[]
+  tags                        Tag[]
+  serviceCatalogItems         ServiceCatalogItem[]
+  waAccounts                  WaAccount[]
+  shortlinks                  Shortlink[]
+  shortlinkClicks             ShortlinkClick[]
+  metaIntegrations            MetaIntegration[]
+  metaEventDispatches         MetaEventDispatch[]
+  auditLogs                   AuditLog[]
+  setupTokens                 AccountSetupToken[]
+  subscription                OrgSubscription?
+  billingCharges              BillingCharge[]
+  plan                        OrgPlan?
+  bankAccounts                OrgBankAccount[]
+  crmPipelines                CrmPipeline[]
+  crmPipelineStages           CrmPipelineStage[]
+  invoicePaymentSetting       OrgInvoicePaymentSetting?
+  invoicePaymentAttempts      InvoicePaymentAttempt[]
+  walletTopups                OrgWalletTopup[]
+  walletLedgers               OrgWalletLedger[]
+  walletWithdrawRequests      OrgWalletWithdrawRequest[]
+  provisioningOrders          OwnerBusinessProvisioningOrder[]
+  whatsappApiKey              OrgWhatsAppApiKey?
+  whatsappPublicWebhook       OrgWhatsAppPublicWebhook?
+  whatsappPublicSchedules     OrgWhatsAppPublicSchedule[]
   whatsappPublicWebhookEvents OrgWhatsAppPublicWebhookEvent[]
+  aiAgentConfig               AiAgentConfig?
+  aiKnowledge                 AiKnowledge[]
+  aiAutomations               AiAutomation[]
+  aiTokenBalance              AiTokenBalance?
+  aiUsages                    AiUsage[]
+  aiResponseLogs              AiResponseLog[]
+  whatsappFlows               WhatsAppFlow[]
+  whatsappFlowNodes           WhatsAppFlowNode[]
+  whatsappFlowEdges           WhatsAppFlowEdge[]
+  whatsappFlowRules           WhatsAppFlowRule[]
+  whatsappEnrollments         WhatsAppEnrollment[]
+  whatsappExecutions          WhatsAppExecution[]
+  whatsappComplianceEvents    WhatsAppComplianceEvent[]
+  whatsappSuppressions        WhatsAppSuppression[]
+  whatsappBroadcasts          WhatsAppBroadcast[]
+  whatsappBroadcastRecipients WhatsAppBroadcastRecipient[]
+  whatsappRulePendingChecks   WhatsAppRulePendingCheck[]
 
   @@index([createdAt])
 }
@@ -219,14 +365,14 @@ model Org {
 model OrgPlan {
   id             String   @id @default(cuid())
   orgId          String   @unique
-  planKey        String   // starter | growth | pro
+  planKey        String // starter | growth | pro
   seatLimit      Int
   storageQuotaMb Int
   retentionDays  Int
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  org            Org      @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 }
 
 model OrgMember {
@@ -236,8 +382,8 @@ model OrgMember {
   role      Role
   createdAt DateTime @default(now())
 
-  org       Org      @relation(fields: [orgId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  org                   Org            @relation(fields: [orgId], references: [id])
+  user                  User           @relation(fields: [userId], references: [id])
   assignedConversations Conversation[] @relation("AssignedConversations")
 
   @@unique([orgId, userId])
@@ -245,24 +391,28 @@ model OrgMember {
 }
 
 model User {
-  id                        String              @id @default(cuid())
-  email                     String              @unique
-  phoneE164                 String?             @unique
+  id                        String    @id @default(cuid())
+  email                     String    @unique
+  phoneE164                 String?   @unique
   passwordHash              String?
   passwordSetAt             DateTime?
   securityNoticeDismissedAt DateTime?
-  isSuspended               Boolean             @default(false)
+  isSuspended               Boolean   @default(false)
   name                      String?
   avatarUrl                 String?
-  createdAt                 DateTime            @default(now())
-  updatedAt                 DateTime            @updatedAt
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
 
-  memberships               OrgMember[]
-  setupTokens               AccountSetupToken[]
-  platformMembership        PlatformMember?
-  provisioningOrders        OwnerBusinessProvisioningOrder[]
-  createdWhatsAppApiKeys    OrgWhatsAppApiKey[]
+  memberships                    OrgMember[]
+  setupTokens                    AccountSetupToken[]
+  platformMembership             PlatformMember?
+  provisioningOrders             OwnerBusinessProvisioningOrder[]
+  createdWhatsAppApiKeys         OrgWhatsAppApiKey[]
   createdWhatsAppPublicSchedules OrgWhatsAppPublicSchedule[]
+  createdWhatsAppFlows           WhatsAppFlow[]
+  createdWhatsAppEnrollments     WhatsAppEnrollment[]
+  createdWhatsAppBroadcasts      WhatsAppBroadcast[]
+  createdWhatsAppFlowRules       WhatsAppFlowRule[]
 
   @@index([phoneE164])
 }
@@ -275,7 +425,7 @@ model OrgBankAccount {
   accountHolder String
   createdAt     DateTime @default(now())
 
-  org           Org      @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 
   @@index([orgId])
 }
@@ -293,47 +443,53 @@ model WaAccount {
   // Store encrypted token only
   accessTokenEnc String
 
-  org            Org      @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 
-  @@index([orgId])
   @@unique([orgId])
   @@unique([orgId, phoneNumberId])
   @@unique([phoneNumberId])
+  @@index([orgId])
 }
 
 model Customer {
-  id              String   @id @default(cuid())
-  orgId           String
-  phoneE164       String
-  displayName     String?
-  waProfilePicUrl String?
-  leadStatus      String   @default("NEW_LEAD")
-  followUpStatus  String?
-  followUpAt      DateTime?
-  businessCategory String?
-  detail          String?
-  hotness         String   @default("COLD")
-  packageName     String?
-  projectValueCents Int?
-  remarks         String?  @db.Text
+  id                 String    @id @default(cuid())
+  orgId              String
+  phoneE164          String
+  displayName        String?
+  waProfilePicUrl    String?
+  leadStatus         String    @default("NEW_LEAD")
+  followUpStatus     String?
+  followUpAt         DateTime?
+  businessCategory   String?
+  detail             String?
+  hotness            String    @default("COLD")
+  packageName        String?
+  projectValueCents  Int?
+  remarks            String?   @db.Text
   assignedToMemberId String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   // Attribution (persisted on customer)
-  source          String?  // organic | meta_ads | etc
-  campaign        String?
-  adset           String?
-  ad              String?
-  platform        String?
-  medium          String?
-  firstContactAt  DateTime?
+  source         String? // organic | meta_ads | etc
+  campaign       String?
+  adset          String?
+  ad             String?
+  platform       String?
+  medium         String?
+  firstContactAt DateTime?
 
-  org             Org      @relation(fields: [orgId], references: [id])
-  conversations   Conversation[]
-  invoices        Invoice[]
-  notes           CustomerNote[]
-  tagLinks        CustomerTag[]
+  org            Org             @relation(fields: [orgId], references: [id])
+  conversations  Conversation[]
+  invoices       Invoice[]
+  notes          CustomerNote[]
+  tagLinks       CustomerTag[]
+  aiUsages       AiUsage[]
+  aiResponseLogs AiResponseLog[]
+  whatsappEnrollments WhatsAppEnrollment[]
+  whatsappSuppressions WhatsAppSuppression[]
+  whatsappBroadcastRecipients WhatsAppBroadcastRecipient[]
+  whatsappRulePendingChecks WhatsAppRulePendingCheck[]
 
   @@unique([orgId, phoneE164])
   @@index([orgId])
@@ -349,13 +505,13 @@ model Customer {
 }
 
 model Tag {
-  id           String      @id @default(cuid())
-  orgId        String
-  name         String
-  color        String      // e.g. "emerald", "purple", "amber"
-  createdAt    DateTime    @default(now())
+  id        String   @id @default(cuid())
+  orgId     String
+  name      String
+  color     String // e.g. "emerald", "purple", "amber"
+  createdAt DateTime @default(now())
 
-  org          Org         @relation(fields: [orgId], references: [id])
+  org           Org           @relation(fields: [orgId], references: [id])
   customerLinks CustomerTag[]
 
   @@unique([orgId, name])
@@ -369,9 +525,9 @@ model CustomerTag {
   tagId      String
   createdAt  DateTime @default(now())
 
-  org        Org      @relation(fields: [orgId], references: [id])
-  customer   Customer @relation(fields: [customerId], references: [id])
-  tag        Tag      @relation(fields: [tagId], references: [id])
+  org      Org      @relation(fields: [orgId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
+  tag      Tag      @relation(fields: [tagId], references: [id])
 
   @@unique([customerId, tagId])
   @@index([orgId])
@@ -386,50 +542,56 @@ model CustomerNote {
   content      String
   createdAt    DateTime @default(now())
 
-  org          Org      @relation(fields: [orgId], references: [id])
-  customer     Customer @relation(fields: [customerId], references: [id])
+  org      Org      @relation(fields: [orgId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
 
   @@index([customerId, createdAt])
   @@index([orgId, createdAt])
 }
 
 model Conversation {
-  id                 String             @id @default(cuid())
-  orgId              String
-  customerId         String
-  status             ConversationStatus @default(OPEN)
+  id         String             @id @default(cuid())
+  orgId      String
+  customerId String
+  status     ConversationStatus @default(OPEN)
 
-  assignedToMemberId String? // OrgMember.id
-  assignedToMember   OrgMember?         @relation("AssignedConversations", fields: [assignedToMemberId], references: [id])
+  assignedToMemberId    String? // OrgMember.id
+  assignedToMember      OrgMember? @relation("AssignedConversations", fields: [assignedToMemberId], references: [id])
   lastMessageSenderName String?
-  lastMessageAt      DateTime?
-  unreadCount        Int                @default(0)
+  lastMessageAt         DateTime?
+  unreadCount           Int        @default(0)
 
   // Attribution (copied for conversation-level analytics)
-  sourceCampaign     String?
-  sourcePlatform     String?
-  sourceMedium       String?
-  shortlinkId        String?
-  trackingId         String?
-  fbclid             String?
-  fbc                String?
-  fbp                String?
-  ctwaClid           String?
-  wabaId             String?
-  waChatJid          String?
-  groupParticipantsJson String?      @db.LongText
-  crmPipelineId      String?
-  crmStageId         String?
+  sourceCampaign        String?
+  sourcePlatform        String?
+  sourceMedium          String?
+  shortlinkId           String?
+  trackingId            String?
+  fbclid                String?
+  fbc                   String?
+  fbp                   String?
+  ctwaClid              String?
+  wabaId                String?
+  waChatJid             String?
+  groupParticipantsJson String? @db.LongText
+  crmPipelineId         String?
+  crmStageId            String?
 
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  org                Org                @relation(fields: [orgId], references: [id])
-  customer           Customer           @relation(fields: [customerId], references: [id])
-  crmPipeline        CrmPipeline?       @relation(fields: [crmPipelineId], references: [id])
-  crmStage           CrmPipelineStage?  @relation(fields: [crmStageId], references: [id])
-  messages           Message[]
-  invoices           Invoice[]
+  org            Org               @relation(fields: [orgId], references: [id])
+  customer       Customer          @relation(fields: [customerId], references: [id])
+  crmPipeline    CrmPipeline?      @relation(fields: [crmPipelineId], references: [id])
+  crmStage       CrmPipelineStage? @relation(fields: [crmStageId], references: [id])
+  messages       Message[]
+  invoices       Invoice[]
+  aiUsages       AiUsage[]
+  aiResponseLogs AiResponseLog[]
+  whatsappEnrollments WhatsAppEnrollment[]
+  whatsappSuppressions WhatsAppSuppression[]
+  whatsappBroadcastRecipients WhatsAppBroadcastRecipient[]
+  whatsappRulePendingChecks WhatsAppRulePendingCheck[]
 
   @@index([orgId, status, lastMessageAt])
   @@index([orgId, status, lastMessageAt, updatedAt], map: "conv_org_status_lastmsg_upd_idx")
@@ -446,90 +608,93 @@ model Conversation {
 }
 
 model CrmPipeline {
-  id          String             @id @default(cuid())
-  orgId       String
-  name        String
-  isDefault   Boolean            @default(false)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  id        String   @id @default(cuid())
+  orgId     String
+  name      String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  org         Org                @relation(fields: [orgId], references: [id])
-  stages      CrmPipelineStage[]
+  org           Org                @relation(fields: [orgId], references: [id])
+  stages        CrmPipelineStage[]
   conversations Conversation[]
 
-  @@index([orgId, createdAt])
   @@unique([orgId, name])
+  @@index([orgId, createdAt])
 }
 
 model CrmPipelineStage {
-  id            String          @id @default(cuid())
-  orgId         String
-  pipelineId    String
-  name          String
-  color         String          @default("emerald")
-  position      Int             @default(0)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id         String   @id @default(cuid())
+  orgId      String
+  pipelineId String
+  name       String
+  color      String   @default("emerald")
+  position   Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  org           Org             @relation(fields: [orgId], references: [id])
-  pipeline      CrmPipeline     @relation(fields: [pipelineId], references: [id])
+  org           Org            @relation(fields: [orgId], references: [id])
+  pipeline      CrmPipeline    @relation(fields: [pipelineId], references: [id])
   conversations Conversation[]
 
-  @@index([orgId, pipelineId, position])
   @@unique([pipelineId, name])
+  @@index([orgId, pipelineId, position])
 }
 
 model Message {
-  id               String             @id @default(cuid())
-  orgId            String
-  conversationId   String
-  waMessageId      String?            @unique
+  id             String  @id @default(cuid())
+  orgId          String
+  conversationId String
+  waMessageId    String? @unique
 
-  direction        MessageDirection
-  type             MessageType
-  text             String?            @db.LongText
+  direction MessageDirection
+  type      MessageType
+  text      String?          @db.LongText
 
   // Media metadata
-  mediaId          String?            // WhatsApp media ID (for retrieval)
-  mediaUrl         String?            // R2 public or signed URL
-  mimeType         String?
-  fileName         String?
-  fileSize         Int?
-  durationSec      Int?
+  mediaId     String? // WhatsApp media ID (for retrieval)
+  mediaUrl    String? // R2 public or signed URL
+  mimeType    String?
+  fileName    String?
+  fileSize    Int?
+  durationSec Int?
 
   // Template metadata
-  templateName     String?
-  templateCategory WaTemplateCategory?
-  templateLanguageCode String?
+  templateName           String?
+  templateCategory       WaTemplateCategory?
+  templateLanguageCode   String?
   templateComponentsJson String?
 
   // System metadata
-  isAutomated      Boolean            @default(false)
-  sendStatus       MessageSendStatus?
-  deliveryStatus   MessageDeliveryStatus?
-  sendError        String?
-  sendAttemptCount Int                @default(0)
+  isAutomated       Boolean                @default(false)
+  sendStatus        MessageSendStatus?
+  deliveryStatus    MessageDeliveryStatus?
+  sendError         String?
+  sendAttemptCount  Int                    @default(0)
   lastSendAttemptAt DateTime?
-  deliveredAt      DateTime?
-  readAt           DateTime?
-  retryable        Boolean            @default(false)
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  retryable         Boolean                @default(false)
 
   // Reply metadata (WhatsApp quoted message context)
-  replyToMessageId   String?
-  replyToWaMessageId String?
-  replyPreviewText   String?
+  replyToMessageId       String?
+  replyToWaMessageId     String?
+  replyPreviewText       String?
   replyPreviewSenderName String?
 
   // Sender metadata (important for group chats)
-  senderWaJid        String?
-  senderPhoneE164    String?
-  senderDisplayName  String?
+  senderWaJid       String?
+  senderPhoneE164   String?
+  senderDisplayName String?
 
-  createdAt        DateTime           @default(now())
+  createdAt DateTime @default(now())
 
-  org              Org                @relation(fields: [orgId], references: [id])
-  conversation     Conversation       @relation(fields: [conversationId], references: [id])
-  paymentProofs    PaymentProof[]
+  org           Org            @relation(fields: [orgId], references: [id])
+  conversation  Conversation   @relation(fields: [conversationId], references: [id])
+  paymentProofs PaymentProof[]
+  whatsappExecutions WhatsAppExecution[]
+  whatsappBroadcastRecipients WhatsAppBroadcastRecipient[]
+  whatsappRulePendingChecks WhatsAppRulePendingCheck[]
 
   @@index([conversationId, createdAt])
   @@index([orgId, conversationId, createdAt], map: "msg_org_conv_created_idx")
@@ -538,142 +703,142 @@ model Message {
 }
 
 model ServiceCatalogItem {
-  id             String   @id @default(cuid())
-  orgId          String
-  name           String
-  category       String?
-  unit           String?
-  priceCents     Int?
-  currency       String   @default("IDR")
+  id         String  @id @default(cuid())
+  orgId      String
+  name       String
+  category   String?
+  unit       String?
+  priceCents Int?
+  currency   String  @default("IDR")
 
   // Allowed attachments: image/pdf/link (no video)
   attachmentUrl  String?
-  attachmentType String?  // "image" | "pdf" | "link"
+  attachmentType String? // "image" | "pdf" | "link"
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  org            Org      @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 
   @@index([orgId, createdAt])
 }
 
 model Invoice {
-  id               String        @id @default(cuid())
-  orgId            String
-  customerId       String
-  conversationId   String?
+  id                          String  @id @default(cuid())
+  orgId                       String
+  customerId                  String
+  conversationId              String?
   customerDisplayNameSnapshot String?
 
-  invoiceNo        String
-  kind             InvoiceKind
-  status           InvoiceStatus @default(DRAFT)
+  invoiceNo String
+  kind      InvoiceKind
+  status    InvoiceStatus @default(DRAFT)
 
-  currency         String        @default("IDR")
-  grossSubtotalCents Int         @default(0)
-  lineDiscountCents Int          @default(0)
-  invoiceDiscountType String     @default("%")
-  invoiceDiscountValue Int       @default(0)
-  invoiceDiscountCents Int       @default(0)
-  taxCents         Int           @default(0)
-  subtotalCents    Int           @default(0)
-  totalCents       Int           @default(0)
+  currency             String @default("IDR")
+  grossSubtotalCents   Int    @default(0)
+  lineDiscountCents    Int    @default(0)
+  invoiceDiscountType  String @default("%")
+  invoiceDiscountValue Int    @default(0)
+  invoiceDiscountCents Int    @default(0)
+  taxCents             Int    @default(0)
+  subtotalCents        Int    @default(0)
+  totalCents           Int    @default(0)
 
   // Optional due date (per invoice overall)
-  dueDate          DateTime?
+  dueDate DateTime?
 
   // Public access token
-  publicToken      String        @unique
+  publicToken String @unique
 
   // Snapshot of bank accounts for invoice rendering (stable even if org settings change later)
-  bankAccountsJson String        @db.LongText
+  bankAccountsJson String @db.LongText
 
   // PDF stored on R2
-  pdfUrl           String?
-  notes            String?       @db.LongText
-  terms            String?       @db.LongText
+  pdfUrl String?
+  notes  String? @db.LongText
+  terms  String? @db.LongText
 
-  createdByUserId  String
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  createdByUserId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  org              Org           @relation(fields: [orgId], references: [id])
-  customer         Customer      @relation(fields: [customerId], references: [id])
-  conversation     Conversation? @relation(fields: [conversationId], references: [id])
+  org          Org           @relation(fields: [orgId], references: [id])
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
 
-  items            InvoiceItem[]
-  milestones       PaymentMilestone[]
-  proofs           PaymentProof[]
-  paymentAttempts  InvoicePaymentAttempt[]
+  items           InvoiceItem[]
+  milestones      PaymentMilestone[]
+  proofs          PaymentProof[]
+  paymentAttempts InvoicePaymentAttempt[]
 
+  @@unique([orgId, invoiceNo])
   @@index([orgId, customerId, createdAt])
   @@index([conversationId])
   @@index([orgId, conversationId, createdAt], map: "inv_org_conv_created_idx")
-  @@unique([orgId, invoiceNo])
 }
 
 model OrgInvoicePaymentSetting {
-  id               String                  @id @default(cuid())
-  orgId            String                  @unique
-  enableBankTransfer Boolean               @default(true)
-  enableQris       Boolean                 @default(false)
-  enabledVaMethodsJson String              @db.LongText
-  feePolicy        InvoiceGatewayFeePolicy @default(CUSTOMER)
-  autoConfirmLabelEnabled Boolean          @default(true)
-  paymentMethodsOrderJson String?          @db.LongText
-  createdAt        DateTime                @default(now())
-  updatedAt        DateTime                @updatedAt
+  id                      String                  @id @default(cuid())
+  orgId                   String                  @unique
+  enableBankTransfer      Boolean                 @default(true)
+  enableQris              Boolean                 @default(false)
+  enabledVaMethodsJson    String                  @db.LongText
+  feePolicy               InvoiceGatewayFeePolicy @default(CUSTOMER)
+  autoConfirmLabelEnabled Boolean                 @default(true)
+  paymentMethodsOrderJson String?                 @db.LongText
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
 
-  org              Org                     @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 }
 
 model InvoicePaymentAttempt {
-  id                 String                      @id @default(cuid())
-  orgId              String
-  invoiceId          String
-  orderId            String                      @unique
-  provider           String                      @default("pakasir")
-  paymentMethod      String
-  feePolicy          InvoiceGatewayFeePolicy
-  invoiceAmountCents Int
-  feeCents           Int                         @default(0)
+  id                   String                      @id @default(cuid())
+  orgId                String
+  invoiceId            String
+  orderId              String                      @unique
+  provider             String                      @default("pakasir")
+  paymentMethod        String
+  feePolicy            InvoiceGatewayFeePolicy
+  invoiceAmountCents   Int
+  feeCents             Int                         @default(0)
   customerPayableCents Int
-  status             InvoicePaymentAttemptStatus @default(PENDING)
-  paymentNumber      String?                     @db.LongText
-  expiresAt          DateTime?
-  paidAt             DateTime?
-  gatewayRawJson     String?                     @db.LongText
-  createdAt          DateTime                    @default(now())
-  updatedAt          DateTime                    @updatedAt
+  status               InvoicePaymentAttemptStatus @default(PENDING)
+  paymentNumber        String?                     @db.LongText
+  expiresAt            DateTime?
+  paidAt               DateTime?
+  gatewayRawJson       String?                     @db.LongText
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
 
-  org                Org                         @relation(fields: [orgId], references: [id])
-  invoice            Invoice                     @relation(fields: [invoiceId], references: [id])
+  org     Org     @relation(fields: [orgId], references: [id])
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
 
   @@index([orgId, invoiceId, createdAt])
   @@index([orgId, status, createdAt])
 }
 
 model InvoiceItem {
-  id          String   @id @default(cuid())
-  orgId       String
-  invoiceId   String
-  name        String
-  description String?
-  qty         Int      @default(1)
-  unit        String?
-  priceCents  Int
-  subtotalCents Int    @default(0)
-  discountType String  @default("IDR")
-  discountValue Int    @default(0)
-  discountCents Int    @default(0)
-  taxLabel    String?
-  taxRateBps  Int      @default(0)
-  taxCents    Int      @default(0)
-  amountCents Int
-  createdAt   DateTime @default(now())
+  id            String   @id @default(cuid())
+  orgId         String
+  invoiceId     String
+  name          String
+  description   String?
+  qty           Int      @default(1)
+  unit          String?
+  priceCents    Int
+  subtotalCents Int      @default(0)
+  discountType  String   @default("IDR")
+  discountValue Int      @default(0)
+  discountCents Int      @default(0)
+  taxLabel      String?
+  taxRateBps    Int      @default(0)
+  taxCents      Int      @default(0)
+  amountCents   Int
+  createdAt     DateTime @default(now())
 
-  org         Org      @relation(fields: [orgId], references: [id])
-  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
+  org     Org     @relation(fields: [orgId], references: [id])
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
 
   @@index([orgId, invoiceId])
   @@index([invoiceId])
@@ -686,38 +851,38 @@ model PaymentMilestone {
   type        PaymentMilestoneType
   amountCents Int
   dueDate     DateTime?
-  status      String               // "PENDING" | "PAID"
+  status      String // "PENDING" | "PAID"
   paidAt      DateTime?
   createdAt   DateTime             @default(now())
 
-  org         Org                  @relation(fields: [orgId], references: [id])
-  invoice     Invoice              @relation(fields: [invoiceId], references: [id])
+  org     Org     @relation(fields: [orgId], references: [id])
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
 
+  @@unique([invoiceId, type])
   @@index([orgId, invoiceId])
   @@index([orgId, status, paidAt], map: "pm_org_status_paidat_idx")
-  @@unique([invoiceId, type])
   @@index([invoiceId])
 }
 
 model PaymentProof {
-  id             String               @id @default(cuid())
-  orgId          String
-  invoiceId      String
-  milestoneType  PaymentMilestoneType? // optional: proof can attach to specific milestone
-  type           ProofType            @default(TRANSFER)
+  id            String                @id @default(cuid())
+  orgId         String
+  invoiceId     String
+  milestoneType PaymentMilestoneType? // optional: proof can attach to specific milestone
+  type          ProofType             @default(TRANSFER)
 
   // Link to original chat message (recommended)
-  messageId      String?
-  mediaUrl       String
-  mimeType       String?
-  fileSize       Int?
+  messageId String?
+  mediaUrl  String
+  mimeType  String?
+  fileSize  Int?
 
   createdByUserId String
-  createdAt      DateTime             @default(now())
+  createdAt       DateTime @default(now())
 
-  org            Org                  @relation(fields: [orgId], references: [id])
-  invoice        Invoice              @relation(fields: [invoiceId], references: [id])
-  message        Message?             @relation(fields: [messageId], references: [id])
+  org     Org      @relation(fields: [orgId], references: [id])
+  invoice Invoice  @relation(fields: [invoiceId], references: [id])
+  message Message? @relation(fields: [messageId], references: [id])
 
   @@index([invoiceId, createdAt])
   @@index([orgId, createdAt])
@@ -725,44 +890,193 @@ model PaymentProof {
 }
 
 model InvoiceSequence {
-  id         String   @id @default(cuid())
-  orgId      String
-  year       Int
-  lastSeq    Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  orgId     String
+  year      Int
+  lastSeq   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  org        Org      @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 
   @@unique([orgId, year])
   @@index([orgId, year])
 }
 
-model Shortlink {
-  id             String   @id @default(cuid())
-  orgId          String
-  code           String   @unique
+model AiAgentConfig {
+  id                  String      @id @default(cuid())
+  orgId               String      @unique
+  enabled             Boolean     @default(false)
+  role                AiAgentRole @default(SALES_ASSISTANT)
+  goal                AiAgentGoal @default(ANSWER_QUESTION)
+  tone                AiTone      @default(FRIENDLY)
+  salesMode           AiSalesMode @default(SOFT_SELLING)
+  businessName        String?
+  advancedPrompt      String?     @db.Text
+  stopIfHumanReply    Boolean     @default(true)
+  typingDelayMs       Int         @default(1200)
+  multiBubbleReply    Boolean     @default(false)
+  confidenceThreshold Int         @default(70)
+  provider            AiProvider  @default(OPENROUTER)
+  modelFree           String      @default("meta-llama/llama-3.1-8b-instruct:free")
+  modelPaid           String      @default("anthropic/claude-3-haiku")
+  activeModelTier     String      @default("FREE")
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
 
-  destinationUrl String   // e.g. https://wa.me/...
-  source         String   @default("meta_ads")
+  org Org @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+}
+
+model AiKnowledge {
+  id        String          @id @default(cuid())
+  orgId     String
+  type      AiKnowledgeType
+  title     String
+  content   String          @db.Text
+  question  String?         @db.Text
+  answer    String?         @db.Text
+  sourceUrl String?
+  fileUrl   String?
+  fileName  String?
+  mimeType  String?
+  isActive  Boolean         @default(true)
+  priority  Int             @default(0)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  org Org @relation(fields: [orgId], references: [id])
+
+  @@index([orgId, type])
+  @@index([orgId, isActive])
+}
+
+model AiAutomation {
+  id           String              @id @default(cuid())
+  orgId        String
+  name         String
+  description  String?
+  enabled      Boolean             @default(false)
+  trigger      AiAutomationTrigger
+  delayMinutes Int                 @default(0)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  org        Org                     @relation(fields: [orgId], references: [id])
+  conditions AiAutomationCondition[]
+  actions    AiAutomationAction[]
+
+  @@index([orgId, enabled])
+  @@index([orgId, trigger])
+}
+
+model AiAutomationCondition {
+  id           String                    @id @default(cuid())
+  automationId String
+  type         AiAutomationConditionType
+  operator     String                    @default("EQUALS")
+  value        String
+
+  automation AiAutomation @relation(fields: [automationId], references: [id])
+
+  @@index([automationId])
+}
+
+model AiAutomationAction {
+  id           String                 @id @default(cuid())
+  automationId String
+  type         AiAutomationActionType
+  payloadJson  String                 @db.Text
+
+  automation AiAutomation @relation(fields: [automationId], references: [id])
+
+  @@index([automationId])
+}
+
+model AiTokenBalance {
+  id              String   @id @default(cuid())
+  orgId           String   @unique
+  totalTokens     Int      @default(0)
+  usedTokens      Int      @default(0)
+  remainingTokens Int      @default(0)
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
+
+  org Org @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+}
+
+model AiUsage {
+  id              String      @id @default(cuid())
+  orgId           String
+  type            AiUsageType
+  conversationId  String?
+  messageId       String?
+  customerId      String?
+  provider        AiProvider  @default(OPENROUTER)
+  model           String
+  inputTokens     Int         @default(0)
+  outputTokens    Int         @default(0)
+  totalTokens     Int         @default(0)
+  costEstimateIdr Int         @default(0)
+  createdAt       DateTime    @default(now())
+
+  org          Org           @relation(fields: [orgId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+  customer     Customer?     @relation(fields: [customerId], references: [id])
+
+  @@index([orgId, createdAt])
+  @@index([conversationId])
+  @@index([customerId])
+}
+
+model AiResponseLog {
+  id              String   @id @default(cuid())
+  orgId           String
+  conversationId  String?
+  customerId      String?
+  promptPreview   String?  @db.Text
+  responseText    String   @db.Text
+  confidenceScore Int?
+  wasSent         Boolean  @default(false)
+  wasEdited       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  org          Org           @relation(fields: [orgId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+  customer     Customer?     @relation(fields: [customerId], references: [id])
+
+  @@index([orgId, createdAt])
+  @@index([conversationId])
+}
+
+model Shortlink {
+  id    String @id @default(cuid())
+  orgId String
+  code  String @unique
+
+  destinationUrl String // e.g. https://wa.me/...
+  source         String    @default("meta_ads")
   campaign       String?
   adset          String?
   adName         String?
   platform       String?
   medium         String?
-  isEnabled      Boolean  @default(true)
+  isEnabled      Boolean   @default(true)
   disabledAt     DateTime?
 
-  createdAt      DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  org            Org      @relation(fields: [orgId], references: [id])
-  clicks         ShortlinkClick[]
+  org    Org              @relation(fields: [orgId], references: [id])
+  clicks ShortlinkClick[]
 
   @@index([orgId, createdAt])
 }
 
 model ShortlinkClick {
-  id          String    @id @default(cuid())
+  id          String  @id @default(cuid())
   orgId       String
   shortlinkId String
   trackingId  String?
@@ -770,13 +1084,13 @@ model ShortlinkClick {
   fbc         String?
   fbp         String?
 
-  createdAt   DateTime  @default(now())
-  clickedAt   DateTime  @default(now())
-  ipHash      String?   // optional hashed ip
-  userAgent   String?   // optional
+  createdAt DateTime @default(now())
+  clickedAt DateTime @default(now())
+  ipHash    String? // optional hashed ip
+  userAgent String? // optional
 
-  org         Org       @relation(fields: [orgId], references: [id])
-  shortlink   Shortlink @relation(fields: [shortlinkId], references: [id])
+  org       Org       @relation(fields: [orgId], references: [id])
+  shortlink Shortlink @relation(fields: [shortlinkId], references: [id])
 
   @@index([shortlinkId, clickedAt])
   @@index([orgId, clickedAt])
@@ -795,24 +1109,24 @@ model MetaIntegration {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  org            Org      @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 
   @@unique([orgId])
   @@index([orgId])
 }
 
 model MetaEventDispatch {
-  id         String   @id @default(cuid())
-  orgId      String
-  dedupeKey  String
-  kind       String
-  attempts   Int      @default(0)
-  sentAt     DateTime?
-  lastError  String?  @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String    @id @default(cuid())
+  orgId     String
+  dedupeKey String
+  kind      String
+  attempts  Int       @default(0)
+  sentAt    DateTime?
+  lastError String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-  org        Org      @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 
   @@unique([orgId, dedupeKey])
   @@index([orgId, sentAt, updatedAt])
@@ -828,7 +1142,7 @@ model AuditLog {
   metaJson    String
   createdAt   DateTime @default(now())
 
-  org         Org      @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 
   @@index([orgId, createdAt])
   @@index([orgId, entityType, action, entityId, createdAt], map: "alog_org_etype_act_eid_created_idx")
@@ -845,8 +1159,8 @@ model AccountSetupToken {
   createdByUserId String?
   createdAt       DateTime                 @default(now())
 
-  user            User                     @relation(fields: [userId], references: [id])
-  org             Org                      @relation(fields: [orgId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  org  Org  @relation(fields: [orgId], references: [id])
 
   @@index([orgId, userId, purpose])
   @@index([expiresAt])
@@ -869,177 +1183,452 @@ model OrgSubscription {
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 
-  org                  Org                @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 }
 
 model BillingCharge {
-  id                String            @id @default(cuid())
-  orgId             String
-  orderId           String            @unique
-  status            BillingChargeStatus @default(PENDING)
-  baseAmountCents   Int
-  gatewayFeeCents   Int
-  totalAmountCents  Int
-  paymentMethod     String            @default("qris")
-  gatewayProvider   String            @default("pakasir")
-  gatewayProjectSlug String
-  gatewayRawJson    String?           @db.LongText
-  paymentNumber     String?           @db.LongText
-  expiredAt         DateTime?
-  paidAt            DateTime?
-  createdByUserId   String?
-  appliedCouponCode String?
-  couponDiscountCents Int             @default(0)
-  couponSnapshotJson String?          @db.LongText
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  id                  String              @id @default(cuid())
+  orgId               String
+  orderId             String              @unique
+  status              BillingChargeStatus @default(PENDING)
+  baseAmountCents     Int
+  gatewayFeeCents     Int
+  totalAmountCents    Int
+  paymentMethod       String              @default("qris")
+  gatewayProvider     String              @default("pakasir")
+  gatewayProjectSlug  String
+  gatewayRawJson      String?             @db.LongText
+  paymentNumber       String?             @db.LongText
+  expiredAt           DateTime?
+  paidAt              DateTime?
+  createdByUserId     String?
+  appliedCouponCode   String?
+  couponDiscountCents Int                 @default(0)
+  couponSnapshotJson  String?             @db.LongText
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
 
-  org               Org               @relation(fields: [orgId], references: [id])
-  couponRedemption  PlatformCouponRedemption?
+  org              Org                       @relation(fields: [orgId], references: [id])
+  couponRedemption PlatformCouponRedemption?
 
   @@index([orgId, createdAt])
   @@index([orgId, status, createdAt])
 }
 
 model OwnerBusinessProvisioningOrder {
-  id                String             @id @default(cuid())
-  userId            String
-  orderId           String             @unique
-  businessName      String
-  status            BillingChargeStatus @default(PENDING)
-  baseAmountCents   Int
-  gatewayFeeCents   Int
-  totalAmountCents  Int
-  paymentMethod     String             @default("qris")
-  gatewayProvider   String             @default("pakasir")
-  gatewayProjectSlug String
-  gatewayRawJson    String?            @db.LongText
-  paymentNumber     String?            @db.LongText
-  expiredAt         DateTime?
-  paidAt            DateTime?
-  createdOrgId      String?            @unique
-  appliedCouponCode String?
-  couponDiscountCents Int              @default(0)
-  couponSnapshotJson String?           @db.LongText
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  id                  String              @id @default(cuid())
+  userId              String
+  orderId             String              @unique
+  businessName        String
+  status              BillingChargeStatus @default(PENDING)
+  baseAmountCents     Int
+  gatewayFeeCents     Int
+  totalAmountCents    Int
+  paymentMethod       String              @default("qris")
+  gatewayProvider     String              @default("pakasir")
+  gatewayProjectSlug  String
+  gatewayRawJson      String?             @db.LongText
+  paymentNumber       String?             @db.LongText
+  expiredAt           DateTime?
+  paidAt              DateTime?
+  createdOrgId        String?             @unique
+  appliedCouponCode   String?
+  couponDiscountCents Int                 @default(0)
+  couponSnapshotJson  String?             @db.LongText
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
 
-  user              User               @relation(fields: [userId], references: [id])
-  createdOrg        Org?               @relation(fields: [createdOrgId], references: [id])
-  couponRedemption  PlatformCouponRedemption?
+  user             User                      @relation(fields: [userId], references: [id])
+  createdOrg       Org?                      @relation(fields: [createdOrgId], references: [id])
+  couponRedemption PlatformCouponRedemption?
 
   @@index([userId, createdAt])
   @@index([status, createdAt])
 }
 
 model OrgWhatsAppApiKey {
-  id                String   @id @default(cuid())
-  orgId              String   @unique
-  keyPrefix          String
-  keyHash            String   @unique @db.Char(64)
-  lastFour           String   @db.Char(4)
-  createdByUserId    String
-  rotatedAt          DateTime?
-  revokedAt          DateTime?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id              String    @id @default(cuid())
+  orgId           String    @unique
+  keyPrefix       String
+  keyHash         String    @unique @db.Char(64)
+  lastFour        String    @db.Char(4)
+  createdByUserId String
+  rotatedAt       DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  org                Org      @relation(fields: [orgId], references: [id])
-  createdByUser      User     @relation(fields: [createdByUserId], references: [id])
+  org           Org  @relation(fields: [orgId], references: [id])
+  createdByUser User @relation(fields: [createdByUserId], references: [id])
 
   @@index([orgId, revokedAt, createdAt])
 }
 
 model OrgWhatsAppPublicWebhook {
-  id                String   @id @default(cuid())
-  orgId              String   @unique
-  url                String?
-  secretEnc          String?
-  enabled            Boolean  @default(false)
-  eventFiltersJson   String?  @db.LongText
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id               String   @id @default(cuid())
+  orgId            String   @unique
+  url              String?
+  secretEnc        String?
+  enabled          Boolean  @default(false)
+  eventFiltersJson String?  @db.LongText
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  org                Org      @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 }
 
 model OrgWhatsAppPublicSchedule {
-  id                String                     @id @default(cuid())
-  orgId              String
-  createdByUserId    String?
-  status             WhatsAppPublicScheduleStatus @default(PENDING)
-  targetType         String                     // "contact" | "group"
-  target             String
-  messageType        String                     // "text" | "media_url"
-  text               String?                    @db.LongText
-  mediaUrl           String?                    @db.LongText
-  mimeType           String?
-  fileName           String?
-  dueAt              DateTime
-  sentAt             DateTime?
-  canceledAt         DateTime?
-  failedAt           DateTime?
-  waMessageId        String?
-  failureCode        String?
-  failureMessage     String?                    @db.Text
-  retryCount         Int                        @default(0)
-  nextRetryAt        DateTime?
-  createdAt          DateTime                   @default(now())
-  updatedAt          DateTime                   @updatedAt
+  id              String                       @id @default(cuid())
+  orgId           String
+  createdByUserId String?
+  status          WhatsAppPublicScheduleStatus @default(PENDING)
+  targetType      String // "contact" | "group"
+  target          String
+  messageType     String // "text" | "media_url"
+  text            String?                      @db.LongText
+  mediaUrl        String?                      @db.LongText
+  mimeType        String?
+  fileName        String?
+  dueAt           DateTime
+  sentAt          DateTime?
+  canceledAt      DateTime?
+  failedAt        DateTime?
+  waMessageId     String?
+  failureCode     String?
+  failureMessage  String?                      @db.Text
+  retryCount      Int                          @default(0)
+  nextRetryAt     DateTime?
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
 
-  org                Org                        @relation(fields: [orgId], references: [id])
-  createdByUser      User?                      @relation(fields: [createdByUserId], references: [id])
+  org           Org   @relation(fields: [orgId], references: [id])
+  createdByUser User? @relation(fields: [createdByUserId], references: [id])
 
   @@index([orgId, status, dueAt])
   @@index([status, dueAt])
   @@index([createdAt])
 }
 
-model OrgWhatsAppPublicWebhookEvent {
-  id                String   @id @default(cuid())
-  eventId            String   @unique
-  orgId              String
-  type               String
-  payloadJson        String   @db.LongText
-  status             String   @default("PENDING")
-  attempts           Int      @default(0)
-  nextAttemptAt      DateTime?
-  deliveredAt        DateTime?
-  lastError          String?  @db.Text
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+model WhatsAppFlow {
+  id              String               @id @default(cuid())
+  orgId           String
+  createdByUserId String?
+  name            String
+  description     String?
+  status          WhatsAppFlowStatus   @default(DRAFT)
+  triggerType     WhatsAppFlowTriggerType @default(MANUAL)
+  isTemplateOnly  Boolean              @default(true)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
 
-  org                Org      @relation(fields: [orgId], references: [id])
+  org           Org                 @relation(fields: [orgId], references: [id])
+  createdByUser User?               @relation(fields: [createdByUserId], references: [id])
+  nodes         WhatsAppFlowNode[]
+  edges         WhatsAppFlowEdge[]
+  rules         WhatsAppFlowRule[]
+  enrollments   WhatsAppEnrollment[]
+  executions    WhatsAppExecution[]
+  rulePendingChecks WhatsAppRulePendingCheck[]
+
+  @@index([orgId, status, createdAt])
+}
+
+model WhatsAppFlowNode {
+  id          String               @id @default(cuid())
+  orgId       String
+  flowId      String
+  key         String
+  type        WhatsAppFlowNodeType
+  configJson  String               @db.LongText
+  positionX   Int                  @default(0)
+  positionY   Int                  @default(0)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  org   Org         @relation(fields: [orgId], references: [id])
+  flow  WhatsAppFlow @relation(fields: [flowId], references: [id])
+
+  @@unique([flowId, key])
+  @@index([orgId, flowId])
+}
+
+model WhatsAppFlowEdge {
+  id           String   @id @default(cuid())
+  orgId        String
+  flowId       String
+  fromNodeKey  String
+  toNodeKey    String
+  conditionKey String?
+  createdAt    DateTime @default(now())
+
+  org  Org          @relation(fields: [orgId], references: [id])
+  flow WhatsAppFlow @relation(fields: [flowId], references: [id])
+
+  @@index([orgId, flowId])
+  @@index([flowId, fromNodeKey])
+}
+
+model WhatsAppEnrollment {
+  id               String                 @id @default(cuid())
+  orgId            String
+  flowId           String
+  conversationId   String
+  customerId       String
+  enrolledByUserId String?
+  status           WhatsAppEnrollmentStatus @default(ACTIVE)
+  currentNodeKey   String?
+  startedAt        DateTime               @default(now())
+  finishedAt       DateTime?
+  lastError        String?                @db.Text
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  org            Org           @relation(fields: [orgId], references: [id])
+  flow           WhatsAppFlow  @relation(fields: [flowId], references: [id])
+  conversation   Conversation  @relation(fields: [conversationId], references: [id])
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  enrolledByUser User?         @relation(fields: [enrolledByUserId], references: [id])
+  executions     WhatsAppExecution[]
+  broadcastRecipients WhatsAppBroadcastRecipient[]
+
+  @@index([orgId, flowId, status, createdAt])
+  @@index([orgId, conversationId, status])
+  @@index([orgId, customerId, status])
+}
+
+model WhatsAppExecution {
+  id             String                 @id @default(cuid())
+  orgId          String
+  flowId         String
+  enrollmentId   String
+  nodeKey        String
+  nodeType       WhatsAppFlowNodeType
+  status         WhatsAppExecutionStatus @default(QUEUED)
+  stopReason     WhatsAppExecutionStopReason?
+  dueAt          DateTime
+  executedAt     DateTime?
+  messageId      String?
+  waMessageId    String?
+  errorCode      String?
+  errorMessage   String?                @db.Text
+  payloadJson    String?                @db.LongText
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  org        Org               @relation(fields: [orgId], references: [id])
+  flow       WhatsAppFlow      @relation(fields: [flowId], references: [id])
+  enrollment WhatsAppEnrollment @relation(fields: [enrollmentId], references: [id])
+  message    Message?          @relation(fields: [messageId], references: [id])
+  broadcastRecipients WhatsAppBroadcastRecipient[]
+
+  @@index([orgId, status, dueAt])
+  @@index([orgId, enrollmentId, createdAt])
+}
+
+model WhatsAppComplianceEvent {
+  id           String   @id @default(cuid())
+  orgId        String
+  flowId       String?
+  enrollmentId String?
+  executionId  String?
+  eventType    String
+  decision     String
+  reasonCode   String?
+  reasonDetail String?  @db.Text
+  createdAt    DateTime @default(now())
+
+  org Org @relation(fields: [orgId], references: [id])
+
+  @@index([orgId, createdAt])
+  @@index([orgId, eventType, createdAt])
+}
+
+model WhatsAppSuppression {
+  id             String   @id @default(cuid())
+  orgId          String
+  customerId     String
+  conversationId String?
+  phoneE164      String
+  reason         String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  org          Org           @relation(fields: [orgId], references: [id])
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+
+  @@unique([orgId, customerId, conversationId, phoneE164], map: "wa_supp_org_cust_conv_phone_uq")
+  @@index([orgId, isActive, createdAt])
+  @@index([orgId, phoneE164, isActive])
+}
+
+model WhatsAppFlowRule {
+  id              String   @id @default(cuid())
+  orgId           String
+  flowId          String
+  createdByUserId String?
+  triggerType     String
+  conditionExpr   String   @db.LongText
+  actionType      String   @db.LongText
+  isActive        Boolean  @default(true)
+  orderIndex      Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  org           Org          @relation(fields: [orgId], references: [id])
+  flow          WhatsAppFlow @relation(fields: [flowId], references: [id])
+  createdByUser User?        @relation(fields: [createdByUserId], references: [id])
+  pendingChecks WhatsAppRulePendingCheck[]
+
+  @@index([orgId, flowId, isActive, createdAt])
+}
+
+model WhatsAppBroadcast {
+  id                    String                @id @default(cuid())
+  orgId                 String
+  createdByUserId       String?
+  name                  String
+  status                WhatsAppBroadcastStatus @default(DRAFT)
+  messageMode           String // TEMPLATE | TEXT
+  recipientMode         String                @default("SEGMENT") // SEGMENT | SELECTED_CUSTOMERS | HYBRID
+  segment               String                @default("all_leads")
+  selectedCustomerIdsJson String?             @db.LongText
+  filtersJson           String?               @db.LongText
+  batchSize             Int                   @default(5)
+  batchIntervalSeconds  Int                   @default(600)
+  scheduledAt           DateTime?
+  templateName          String?
+  templateLanguageCode  String?
+  templateCategory      WaTemplateCategory?
+  templateComponentsJson String?              @db.LongText
+  text                  String?               @db.LongText
+  launchedAt            DateTime?
+  completedAt           DateTime?
+  canceledAt            DateTime?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  org           Org                        @relation(fields: [orgId], references: [id])
+  createdByUser User?                      @relation(fields: [createdByUserId], references: [id])
+  recipients    WhatsAppBroadcastRecipient[]
+
+  @@index([orgId, status, createdAt])
+  @@index([orgId, scheduledAt])
+}
+
+model WhatsAppBroadcastRecipient {
+  id             String                         @id @default(cuid())
+  orgId          String
+  broadcastId    String
+  customerId     String
+  conversationId String
+  enrollmentId   String?
+  executionId    String?
+  messageId      String?
+  waMessageId    String?
+  phoneE164      String
+  status         WhatsAppBroadcastRecipientStatus @default(PENDING)
+  dueAt          DateTime                       @default(now())
+  attemptCount   Int                            @default(0)
+  lastAttemptAt  DateTime?
+  errorCode      String?
+  errorMessage   String?                        @db.Text
+  createdAt      DateTime                       @default(now())
+  updatedAt      DateTime                       @updatedAt
+
+  org          Org               @relation(fields: [orgId], references: [id])
+  broadcast    WhatsAppBroadcast @relation(fields: [broadcastId], references: [id])
+  customer     Customer          @relation(fields: [customerId], references: [id])
+  conversation Conversation      @relation(fields: [conversationId], references: [id])
+  enrollment   WhatsAppEnrollment? @relation(fields: [enrollmentId], references: [id])
+  execution    WhatsAppExecution?  @relation(fields: [executionId], references: [id])
+  message      Message?            @relation(fields: [messageId], references: [id])
+
+  @@unique([broadcastId, conversationId])
+  @@index([orgId, messageId])
+  @@index([orgId, waMessageId])
+  @@index([orgId, broadcastId, status, dueAt])
+  @@index([orgId, phoneE164, status])
+}
+
+model WhatsAppRulePendingCheck {
+  id             String   @id @default(cuid())
+  orgId          String
+  flowId         String?
+  ruleId         String?
+  eventType      String
+  messageScope   String   @default("ANY") // ANY | SEQUENCE | BROADCAST
+  sequenceId     String?
+  broadcastId    String?
+  conversationId String
+  customerId     String
+  messageId      String
+  waMessageId    String?
+  dueAt          DateTime
+  status         String   @default("PENDING") // PENDING | CANCELED | PROCESSED
+  processedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  org          Org      @relation(fields: [orgId], references: [id])
+  flow         WhatsAppFlow? @relation(fields: [flowId], references: [id])
+  rule         WhatsAppFlowRule? @relation(fields: [ruleId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  customer     Customer @relation(fields: [customerId], references: [id])
+  message      Message  @relation(fields: [messageId], references: [id])
+
+  @@unique([orgId, messageId, eventType], map: "wa_rule_pending_org_msg_event_uq")
+  @@index([orgId, status, dueAt])
+  @@index([orgId, flowId, status, dueAt])
+  @@index([orgId, broadcastId, status, dueAt])
+}
+
+model OrgWhatsAppPublicWebhookEvent {
+  id            String    @id @default(cuid())
+  eventId       String    @unique
+  orgId         String
+  type          String
+  payloadJson   String    @db.LongText
+  status        String    @default("PENDING")
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime?
+  deliveredAt   DateTime?
+  lastError     String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  org Org @relation(fields: [orgId], references: [id])
 
   @@index([orgId, status, createdAt])
   @@index([status, nextAttemptAt])
 }
 
 model OrgWalletTopup {
-  id                String           @id @default(cuid())
-  orgId             String
-  orderId           String           @unique
-  amountCents       Int
-  feeCents          Int              @default(0)
+  id                   String            @id @default(cuid())
+  orgId                String
+  orderId              String            @unique
+  amountCents          Int
+  feeCents             Int               @default(0)
   customerPayableCents Int
-  paymentMethod     String
-  paymentNumber     String?          @db.LongText
-  status            WalletTopupStatus @default(PENDING)
-  expiresAt         DateTime?
-  paidAt            DateTime?
-  gatewayRawJson    String?          @db.LongText
-  createdByUserId   String?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  paymentMethod        String
+  paymentNumber        String?           @db.LongText
+  status               WalletTopupStatus @default(PENDING)
+  expiresAt            DateTime?
+  paidAt               DateTime?
+  gatewayRawJson       String?           @db.LongText
+  createdByUserId      String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
 
-  org               Org              @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 
   @@index([orgId, status, createdAt])
   @@index([orgId, createdAt])
 }
 
 model OrgWalletLedger {
-  id                String               @id @default(cuid())
+  id                String                @id @default(cuid())
   orgId             String
   type              WalletLedgerType
   direction         WalletLedgerDirection
@@ -1049,9 +1638,9 @@ model OrgWalletLedger {
   referenceId       String
   note              String?
   createdByUserId   String?
-  createdAt         DateTime             @default(now())
+  createdAt         DateTime              @default(now())
 
-  org               Org                  @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 
   @@index([orgId, createdAt])
   @@index([orgId, type, createdAt])
@@ -1059,22 +1648,22 @@ model OrgWalletLedger {
 }
 
 model OrgWalletWithdrawRequest {
-  id                String              @id @default(cuid())
+  id                String               @id @default(cuid())
   orgId             String
   amountCents       Int
   bankName          String
   accountNumber     String
   accountHolder     String
   status            WalletWithdrawStatus @default(PENDING)
-  note              String?             @db.Text
-  processedNote     String?             @db.Text
+  note              String?              @db.Text
+  processedNote     String?              @db.Text
   requestedByUserId String
   processedByUserId String?
   processedAt       DateTime?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
 
-  org               Org                 @relation(fields: [orgId], references: [id])
+  org Org @relation(fields: [orgId], references: [id])
 
   @@index([orgId, status, createdAt])
   @@index([orgId, createdAt])
@@ -1087,52 +1676,52 @@ model PlatformMember {
   createdByUserId String?
   createdAt       DateTime     @default(now())
 
-  user            User         @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model PlatformCoupon {
-  id                String                     @id @default(cuid())
-  code              String                     @unique
-  name              String
-  description       String?                    @db.Text
-  discountType      PlatformCouponDiscountType
-  discountValue     Int
-  maxDiscountCents  Int?
-  minSubtotalCents  Int?
-  maxRedemptions    Int?
-  redeemedCount     Int                        @default(0)
-  target            PlatformCouponTarget       @default(ALL)
-  startsAt          DateTime?
-  expiresAt         DateTime?
-  isActive          Boolean                    @default(true)
-  createdByUserId   String?
-  updatedByUserId   String?
-  createdAt         DateTime                   @default(now())
-  updatedAt         DateTime                   @updatedAt
+  id               String                     @id @default(cuid())
+  code             String                     @unique
+  name             String
+  description      String?                    @db.Text
+  discountType     PlatformCouponDiscountType
+  discountValue    Int
+  maxDiscountCents Int?
+  minSubtotalCents Int?
+  maxRedemptions   Int?
+  redeemedCount    Int                        @default(0)
+  target           PlatformCouponTarget       @default(ALL)
+  startsAt         DateTime?
+  expiresAt        DateTime?
+  isActive         Boolean                    @default(true)
+  createdByUserId  String?
+  updatedByUserId  String?
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
 
-  redemptions       PlatformCouponRedemption[]
+  redemptions PlatformCouponRedemption[]
 
   @@index([isActive, code])
   @@index([target, isActive, expiresAt])
 }
 
 model PlatformCouponRedemption {
-  id                   String                           @id @default(cuid())
-  couponId             String
-  couponCode           String
-  targetType           PlatformCouponTarget
-  orgId                String?
-  userId               String?
-  billingChargeId      String?                          @unique
-  provisioningOrderId  String?                          @unique
-  subtotalCents        Int
-  discountCents        Int
-  finalAmountCents     Int
-  createdAt            DateTime                         @default(now())
+  id                  String               @id @default(cuid())
+  couponId            String
+  couponCode          String
+  targetType          PlatformCouponTarget
+  orgId               String?
+  userId              String?
+  billingChargeId     String?              @unique
+  provisioningOrderId String?              @unique
+  subtotalCents       Int
+  discountCents       Int
+  finalAmountCents    Int
+  createdAt           DateTime             @default(now())
 
-  coupon               PlatformCoupon                   @relation(fields: [couponId], references: [id])
-  billingCharge        BillingCharge?                   @relation(fields: [billingChargeId], references: [id])
-  provisioningOrder    OwnerBusinessProvisioningOrder?  @relation(fields: [provisioningOrderId], references: [id])
+  coupon            PlatformCoupon                  @relation(fields: [couponId], references: [id])
+  billingCharge     BillingCharge?                  @relation(fields: [billingChargeId], references: [id])
+  provisioningOrder OwnerBusinessProvisioningOrder? @relation(fields: [provisioningOrderId], references: [id])
 
   @@index([couponId, createdAt])
   @@index([orgId, createdAt])
@@ -1141,13 +1730,13 @@ model PlatformCouponRedemption {
 }
 
 model PlatformAuditLog {
-  id            String   @id @default(cuid())
-  actorUserId   String
-  action        String
-  targetType    String
-  targetId      String
-  metaJson      String   @db.LongText
-  createdAt     DateTime @default(now())
+  id          String   @id @default(cuid())
+  actorUserId String
+  action      String
+  targetType  String
+  targetId    String
+  metaJson    String   @db.LongText
+  createdAt   DateTime @default(now())
 
   @@index([actorUserId, createdAt])
   @@index([targetType, targetId, createdAt])

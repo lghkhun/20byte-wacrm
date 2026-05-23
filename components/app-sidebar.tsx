@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { AlertTriangle, FileText, LayoutDashboard, Link2, MessageCircle, Shield, Users, Wallet, Workflow, X } from "lucide-react";
+import { AlertTriangle, BarChart3, Bot, FileText, LayoutDashboard, Link2, MessageCircle, Shield, Users, Wallet, Workflow, X } from "lucide-react";
 import QRCode from "qrcode";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -179,6 +179,7 @@ export function AppSidebar({ user, ownerOnboardingStatus = null }: AppSidebarPro
   const [checkoutPaymentExpiresAt, setCheckoutPaymentExpiresAt] = useState<string | null>(null);
   const [checkoutQrDataUrl, setCheckoutQrDataUrl] = useState<string | null>(null);
   const [checkoutNowMs, setCheckoutNowMs] = useState(() => Date.now());
+  const [isPageVisible, setIsPageVisible] = useState(true);
   const [isCommunityDialogOpen, setIsCommunityDialogOpen] = useState(false);
   const [communityQrDataUrl, setCommunityQrDataUrl] = useState<string | null>(null);
   const [walletBalanceCents, setWalletBalanceCents] = useState<number | null>(null);
@@ -187,6 +188,20 @@ export function AppSidebar({ user, ownerOnboardingStatus = null }: AppSidebarPro
   const [isCommunityCardDismissed, setIsCommunityCardDismissed] = useState(false);
   const loadingToastIdRef = useRef<string | number | null>(null);
   const billingReminderCacheRef = useRef<{ checkedAt: number; message: string | null } | null>(null);
+
+  useEffect(() => {
+    const updateVisibility = () => {
+      setIsPageVisible(document.visibilityState === "visible");
+    };
+
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    window.addEventListener("focus", updateVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", updateVisibility);
+      window.removeEventListener("focus", updateVisibility);
+    };
+  }, []);
 
   useEffect(() => {
     const syncDismissState = (
@@ -275,6 +290,11 @@ export function AppSidebar({ user, ownerOnboardingStatus = null }: AppSidebarPro
         icon: Users
       },
       {
+        title: "Report",
+        url: "/report",
+        icon: BarChart3
+      },
+      {
         title: "Invoices",
         url: "/invoices",
         icon: FileText
@@ -288,6 +308,16 @@ export function AppSidebar({ user, ownerOnboardingStatus = null }: AppSidebarPro
         title: "CRM Pipeline",
         url: "/crm/pipelines",
         icon: Workflow
+      },
+      {
+        title: "Sequences & Broadcast",
+        url: "/whatsapp-campaigns",
+        icon: Workflow
+      },
+      {
+        title: "AI & Automation",
+        url: "/ai-automation",
+        icon: Bot
       },
       ...(user?.isSuperadmin
         ? [
@@ -320,6 +350,9 @@ export function AppSidebar({ user, ownerOnboardingStatus = null }: AppSidebarPro
     let active = true;
 
     async function loadWalletSummary() {
+      if (!isPageVisible) {
+        return;
+      }
       if (active) {
         setIsWalletLoading(true);
       }
@@ -346,14 +379,17 @@ export function AppSidebar({ user, ownerOnboardingStatus = null }: AppSidebarPro
 
     void loadWalletSummary();
     const intervalId = window.setInterval(() => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
       void loadWalletSummary();
-    }, 60_000);
+    }, 120_000);
 
     return () => {
       active = false;
       window.clearInterval(intervalId);
     };
-  }, [isOwnerRole, user]);
+  }, [isOwnerRole, isPageVisible, user]);
 
   useEffect(() => {
     setPendingPath(null);
@@ -373,6 +409,9 @@ export function AppSidebar({ user, ownerOnboardingStatus = null }: AppSidebarPro
     let active = true;
 
     async function loadReminder() {
+      if (!isPageVisible) {
+        return;
+      }
       const cached = billingReminderCacheRef.current;
       const now = Date.now();
       if (cached && now - cached.checkedAt < 60_000) {
@@ -403,14 +442,17 @@ export function AppSidebar({ user, ownerOnboardingStatus = null }: AppSidebarPro
 
     void loadReminder();
     const interval = window.setInterval(() => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
       void loadReminder();
-    }, 60_000);
+    }, 120_000);
 
     return () => {
       active = false;
       window.clearInterval(interval);
     };
-  }, [user]);
+  }, [isPageVisible, user]);
 
   useEffect(() => {
     let canceled = false;
@@ -552,12 +594,35 @@ export function AppSidebar({ user, ownerOnboardingStatus = null }: AppSidebarPro
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild tooltip="20byte">
               <Link href="/inbox">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <span className="text-xs font-semibold">20</span>
+                <div className="hidden aspect-square size-7 items-center justify-center rounded-lg bg-transparent p-0 group-data-[collapsible=icon]:flex">
+                  <Image
+                    src="/branding/20byte-pavicon.svg"
+                    alt="20byte icon"
+                    width={24}
+                    height={24}
+                    className="h-6 w-6 object-contain"
+                    priority
+                  />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">20byte</span>
-                  <span className="truncate text-xs text-sidebar-foreground/70">Chat-first CRM</span>
+                <div className="flex items-center group-data-[collapsible=icon]:hidden">
+                  <Image
+                    src="/branding/20byte-logo-dark.svg"
+                    alt="20byte"
+                    width={160}
+                    height={48}
+                    className="h-7 w-auto object-contain dark:hidden"
+                    unoptimized
+                    priority
+                  />
+                  <Image
+                    src="/branding/20byte-logo-light.svg"
+                    alt="20byte"
+                    width={160}
+                    height={48}
+                    className="hidden h-7 w-auto object-contain dark:block"
+                    unoptimized
+                    priority
+                  />
                 </div>
               </Link>
             </SidebarMenuButton>

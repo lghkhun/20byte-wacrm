@@ -2,6 +2,7 @@ import { InvoiceStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/db/prisma";
 import { publishInvoiceCreatedEvent, publishInvoiceUpdatedEvent } from "@/lib/ably/publisher";
+import { processAiAutomationTrigger } from "@/server/services/aiAutomationService";
 import { writeAuditLogSafe } from "@/server/services/auditLogService";
 import { requireInvoiceAccess } from "@/server/services/invoice/access";
 import {
@@ -143,6 +144,14 @@ export async function createDraftInvoice(
     invoiceId: created.id,
     status: created.status
   });
+  void processAiAutomationTrigger({
+    trigger: "INVOICE_CREATED",
+    orgId,
+    invoiceId: created.id,
+    conversationId: conversationId ?? undefined,
+    customerId,
+    invoiceStatus: created.status
+  }).catch(() => undefined);
   return created;
 }
 

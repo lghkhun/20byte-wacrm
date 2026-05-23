@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db/prisma";
 import { canAccessCustomerDirectory } from "@/lib/permissions/orgPermissions";
 import { publishCustomerUpdatedEvent } from "@/lib/ably/publisher";
+import { processAiAutomationTrigger } from "@/server/services/aiAutomationService";
 import { assertOrgBillingAccess } from "@/server/services/billingService";
 import { ServiceError } from "@/server/services/serviceError";
 
@@ -251,6 +252,12 @@ export async function assignTagToCustomer(
     orgId,
     customerId
   });
+  void processAiAutomationTrigger({
+    trigger: "TAG_ADDED",
+    orgId,
+    customerId,
+    customerTags: [tag.name]
+  }).catch(() => undefined);
 
   return tag;
 }

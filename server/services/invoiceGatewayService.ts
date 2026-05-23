@@ -16,6 +16,7 @@ import { isLikelyQrisPayload } from "@/lib/payment/checkoutFallback";
 import { acquireIdempotencyLock } from "@/lib/redis/idempotency";
 import { publishInvoicePaidEvent, publishInvoiceUpdatedEvent } from "@/lib/ably/publisher";
 import { syncConversationCrmStageFromInvoice } from "@/server/services/crmPipelineService";
+import { processAiAutomationTrigger } from "@/server/services/aiAutomationService";
 import { writeAuditLogSafe } from "@/server/services/auditLogService";
 import { resolvePrimaryOrganizationIdForUser } from "@/server/services/organizationService";
 import { ServiceError } from "@/server/services/serviceError";
@@ -676,6 +677,21 @@ export async function processInvoicePakasirWebhook(payload: {
 
   if (!attempt) {
     throw new ServiceError(404, "INVOICE_ATTEMPT_NOT_FOUND", "Invoice payment attempt not found.");
+  }
+
+  if (!isCompletedStatus(incomingStatus)) {
+    void processAiAutomationTrigger({
+      trigger: "INVOICE_UNPAID",
+      orgId: attempt.orgId,
+      invoiceId: attempt.invoiceId,
+      conversationId: attempt.invoice.conversationId ?? undefined,
+      invoiceStatus: attempt.invoice.status
+    }).catch(() => undefined);
+
+    return {
+      skipped: true,
+      reason: "unpaid_status" as const
+    };
   }
 
   if (attempt.status === InvoicePaymentAttemptStatus.PAID) {

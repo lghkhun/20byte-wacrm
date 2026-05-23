@@ -27,9 +27,11 @@
     "vps:deploy": "ssh 20byte-vps 'cd /srv/20byte && ./scripts/deploy.sh'",
     "build": "next build",
     "start": "next start",
-    "worker:start": "tsx worker/main.ts",
+    "worker:start": "env -u DATABASE_URL -u REDIS_URL node scripts/run-with-local-env.mjs tsx worker/main.ts",
     "db:seed": "tsx scripts/seedDatabase.ts",
-    "lint": "next lint",
+    "db:seed:ai-khun": "node scripts/run-with-local-env.mjs tsx scripts/seedAiAutomationForKhun.ts",
+    "lint": "eslint .",
+    "lint:campaign": "eslint components/whatsapp-campaigns/WhatsAppCampaignWorkspace.tsx app/api/whatsapp server/services/whatsappCampaignService.ts server/services/whatsappCampaignRules.ts server/services/message/baileysOutboundStatus.ts worker/processors/whatsappCampaignProcessor.ts",
     "typecheck": "tsc --noEmit --incremental false",
     "test": "NODE_ENV=test tsx --test tests/**/*.test.ts",
     "test:integration": "RUN_DB_INTEGRATION_TESTS=1 NODE_ENV=test tsx --test tests/integration/**/*.test.ts",
@@ -40,6 +42,7 @@
     "smoke:ui:shortlinks-deep": "node scripts/smoke-ui-shortlinks-deep.mjs",
     "smoke:ui:pipeline-deep": "node scripts/smoke-ui-pipeline-deep.mjs",
     "smoke:ui:invoices-deep": "node scripts/smoke-ui-invoices-deep.mjs",
+    "smoke:ui:report-campaign": "node scripts/smoke-ui-report-campaign.mjs",
     "smoke:ui:full": "npm run smoke:ui && npm run smoke:ui:customers-deep && npm run smoke:ui:inbox-deep && npm run smoke:ui:shortlinks-deep && npm run smoke:ui:pipeline-deep && npm run smoke:ui:invoices-deep",
     "smoke:ui:report": "node scripts/smoke-report-summary.mjs",
     "smoke:ui:full:report": "npm run smoke:ui:full && npm run smoke:ui:report",
@@ -110,6 +113,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.10.2",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^18.3.16",
@@ -118,12 +122,16 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "15.5.14",
     "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^17.6.0",
+    "jiti": "^2.7.0",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
     "prisma": "^6.19.3",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.20.4",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.59.2"
   },
   "overrides": {
     "defu": "^6.1.6",

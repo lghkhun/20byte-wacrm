@@ -132,6 +132,20 @@ export function FinanceWorkspace() {
   const [withdrawBankName, setWithdrawBankName] = useState("");
   const [withdrawAccountNumber, setWithdrawAccountNumber] = useState("");
   const [withdrawAccountHolder, setWithdrawAccountHolder] = useState("");
+  const [isPageVisible, setIsPageVisible] = useState(true);
+
+  useEffect(() => {
+    const updateVisibility = () => {
+      setIsPageVisible(document.visibilityState === "visible");
+    };
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    window.addEventListener("focus", updateVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", updateVisibility);
+      window.removeEventListener("focus", updateVisibility);
+    };
+  }, []);
   
   useEffect(() => {
     if (showWithdrawDialog) {
@@ -184,13 +198,19 @@ export function FinanceWorkspace() {
   }, [loadData]);
 
   useEffect(() => {
+    if (!isPageVisible) {
+      return;
+    }
     const interval = window.setInterval(() => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
       void loadData();
     }, 60_000);
     return () => {
       window.clearInterval(interval);
     };
-  }, [loadData]);
+  }, [isPageVisible, loadData]);
 
   const pendingSettlementCents = useMemo(
     () =>

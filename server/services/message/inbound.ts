@@ -3,6 +3,8 @@ import { extractTrackingRef } from "@/lib/attribution/trackingRef";
 import { prisma } from "@/lib/db/prisma";
 import { enqueueMetaEventJob } from "@/server/queues/metaEventQueue";
 import type { Prisma } from "@prisma/client";
+import { processAiAutomationTrigger } from "@/server/services/aiAutomationService";
+import { autoEnrollWhatsAppFlowOnChatIncoming } from "@/server/services/whatsappCampaignService";
 
 import type { InboundStoreResult, ResolvedAttribution, StoreInboundMessageInput } from "@/server/services/message/messageTypes";
 import { normalize, normalizeFileSize, normalizeMessageText, normalizeOptional } from "@/server/services/message/messageUtils";
@@ -148,6 +150,19 @@ export async function storeInboundMessage(input: StoreInboundMessageInput): Prom
     assignedToMemberId: createdMessage.assignedToMemberId,
     status: createdMessage.conversationStatus
   });
+  void processAiAutomationTrigger({
+    trigger: "CHAT_INCOMING",
+    orgId: context.orgId,
+    conversationId: createdMessage.conversationId,
+    customerId: createdMessage.customerId,
+    conversationStatus: createdMessage.conversationStatus,
+    noHumanReply: Boolean(createdMessage.assignedToMemberId)
+  }).catch(() => undefined);
+  void autoEnrollWhatsAppFlowOnChatIncoming({
+    orgId: context.orgId,
+    conversationId: createdMessage.conversationId,
+    customerId: createdMessage.customerId
+  }).catch(() => undefined);
 
   if (createdMessage.customerCreated) {
     const conversationAttribution = await prisma.conversation.findFirst({

@@ -291,6 +291,30 @@ export async function createOrganizationForUser(input: CreateOrganizationInput):
       }
     });
 
+    await tx.aiAgentConfig.create({
+      data: {
+        orgId: organization.id,
+        enabled: false,
+        role: "SALES_ASSISTANT",
+        goal: "ANSWER_QUESTION",
+        tone: "FRIENDLY",
+        salesMode: "SOFT_SELLING",
+        stopIfHumanReply: true,
+        typingDelayMs: 1200,
+        multiBubbleReply: false,
+        confidenceThreshold: 70,
+        activeModelTier: "FREE"
+      }
+    });
+    await tx.aiTokenBalance.create({
+      data: {
+        orgId: organization.id,
+        totalTokens: 0,
+        usedTokens: 0,
+        remainingTokens: 0
+      }
+    });
+
     return {
       id: organization.id,
       name: organization.name,

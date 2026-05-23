@@ -17,7 +17,15 @@ import { getActiveOrganizationForUser } from "@/server/services/organizationServ
 
 export const metadata: Metadata = {
   title: "20byte",
-  description: "20byte SaaS foundation shell"
+  description: "20byte SaaS foundation shell",
+  icons: {
+    icon: [
+      { url: "/branding/20byte-pavicon.svg", type: "image/svg+xml" },
+      { url: "/branding/20byte-pavicon.png", type: "image/png", sizes: "32x32" }
+    ],
+    shortcut: ["/branding/20byte-pavicon.png"],
+    apple: [{ url: "/branding/20byte-pavicon.png", sizes: "180x180", type: "image/png" }]
+  }
 };
 
 export default async function RootLayout({
