@@ -312,6 +312,31 @@ async function getConnectedAccount(orgId: string): Promise<ConnectedAccountSumma
   });
 }
 
+async function hasUsableStoredAuth(orgId: string): Promise<boolean> {
+  try {
+    const credsStats = await stat(path.join(getAuthFolder(orgId), "creds.json"));
+    return credsStats.isFile() && credsStats.size > 0;
+  } catch {
+    return false;
+  }
+}
+
+async function markStoredAuthAsDisconnected(orgId: string, reason: string): Promise<void> {
+  const entry = getSessionEntry(orgId);
+  entry.socket = null;
+  entry.initPromise = null;
+  entry.allowReconnect = false;
+  clearReconnectTimer(entry);
+  entry.reconnectAttempts = 0;
+  entry.status = "DISCONNECTED";
+  entry.lastError = reason;
+  entry.qrCode = null;
+  entry.qrCodeExpiresAt = null;
+  entry.pairingCode = null;
+  entry.pairingCodeExpiresAt = null;
+  await clearConnectedAccount(orgId);
+}
+
 async function bootstrapConnectedBaileysSessions(): Promise<void> {
   if (globalThis.__twentyByteBaileysBootstrapStarted) {
     return;
@@ -332,7 +357,17 @@ async function bootstrapConnectedBaileysSessions(): Promise<void> {
     const uniqueOrgIds = Array.from(new Set(accounts.map((item) => item.orgId).filter(Boolean)));
     uniqueOrgIds.forEach((orgId, index) => {
       setTimeout(() => {
-        void ensureBaileysSocket(orgId).catch((error) => {
+        void (async () => {
+          if (!(await hasUsableStoredAuth(orgId))) {
+            await markStoredAuthAsDisconnected(
+              orgId,
+              "Stored WhatsApp credentials are missing or invalid. Reconnect from Settings."
+            );
+            return;
+          }
+
+          await ensureBaileysSocket(orgId);
+        })().catch((error) => {
           const entry = getSessionEntry(orgId);
           entry.lastError = error instanceof Error ? error.message : "Failed to bootstrap WhatsApp session.";
           scheduleReconnect(orgId, "bootstrap-failed");
@@ -1375,10 +1410,17 @@ export async function getBaileysConnectionContext(
   await requireSettingsAccess(actorUserId, normalizedOrgId);
   const connectedAccount = await getConnectedAccount(normalizedOrgId);
   if (options?.refresh && connectedAccount) {
-    try {
-      await ensureConnectedSocketForOrg(normalizedOrgId);
-    } catch {
-      // surface latest state via entry.lastError
+    if (!(await hasUsableStoredAuth(normalizedOrgId))) {
+      await markStoredAuthAsDisconnected(
+        normalizedOrgId,
+        "Stored WhatsApp credentials are missing or invalid. Reconnect from Settings."
+      );
+    } else {
+      try {
+        await ensureConnectedSocketForOrg(normalizedOrgId);
+      } catch {
+        // surface latest state via entry.lastError
+      }
     }
   }
 
