@@ -60,7 +60,7 @@ services:
   worker:
     <<: *app-base
     container_name: 20byte_bg_worker
-    command: ["npm", "run", "worker:start"]
+    command: ["./node_modules/.bin/tsx", "worker/main.ts"]
 
   web-blue:
     <<: *app-base

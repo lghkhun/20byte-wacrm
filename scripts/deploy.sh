@@ -40,7 +40,7 @@ as_root() {
 }
 
 compose() {
-  as_root "$DOCKER_BIN" compose -f docker-compose.vps.yml --project-name "$PROJECT_NAME" "$@"
+  as_root env APP_IMAGE="$APP_IMAGE" "$DOCKER_BIN" compose -f docker-compose.vps.yml --project-name "$PROJECT_NAME" "$@"
 }
 
 require_file() {

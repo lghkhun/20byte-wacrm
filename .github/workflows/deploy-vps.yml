@@ -105,6 +105,7 @@ jobs:
             git fetch origin main
             git checkout main
             git reset --hard origin/main
+            chmod +x scripts/deploy.sh scripts/bootstrap-vps.sh scripts/docker-entrypoint.sh
             rm -f '$PID_FILE' '$LOG_FILE'
             nohup env \
               APP_IMAGE='$APP_IMAGE' \
@@ -112,7 +113,7 @@ jobs:
               GHCR_TOKEN='$GHCR_TOKEN' \
               DEPLOY_GIT_AUTO_STASH=1 \
               SKIP_GIT_SYNC=1 \
-              sh -lc './scripts/deploy.sh' > '$LOG_FILE' 2>&1 &
+              sh -lc 'sh scripts/deploy.sh' > '$LOG_FILE' 2>&1 &
             echo \$! > '$PID_FILE'
             echo '[deploy] started pid='\"\$(cat '$PID_FILE')\"' log=$LOG_FILE'
           "
