@@ -98,14 +98,14 @@ jobs:
           ssh $SSH_OPTS "$REMOTE" "
             set -eu
             cd '$VPS_PATH'
-            chmod +x scripts/deploy.sh scripts/bootstrap-vps.sh scripts/docker-entrypoint.sh
+            chmod +x scripts/deploy.sh scripts/bootstrap-vps.sh scripts/docker-entrypoint.sh || sudo chmod +x scripts/deploy.sh scripts/bootstrap-vps.sh scripts/docker-entrypoint.sh
             if [ -n \"\$(git status --porcelain)\" ]; then
               git stash push --include-untracked -m 'workflow-pre-deploy-$DEPLOY_RUN_ID' >/dev/null || true
             fi
             git fetch origin main
             git checkout main
             git reset --hard origin/main
-            chmod +x scripts/deploy.sh scripts/bootstrap-vps.sh scripts/docker-entrypoint.sh
+            chmod +x scripts/deploy.sh scripts/bootstrap-vps.sh scripts/docker-entrypoint.sh || sudo chmod +x scripts/deploy.sh scripts/bootstrap-vps.sh scripts/docker-entrypoint.sh
             rm -f '$PID_FILE' '$LOG_FILE'
             nohup env \
               APP_IMAGE='$APP_IMAGE' \
