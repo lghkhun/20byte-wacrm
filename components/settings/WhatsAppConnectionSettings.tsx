@@ -289,6 +289,9 @@ export function WhatsAppConnectionSettings() {
   const effectiveConnectionStatus = useMemo(() => {
     return connectionContext?.connectionStatus ?? "DISCONNECTED";
   }, [connectionContext]);
+  const requiresReconnect = useMemo(() => {
+    return connectionContext?.lastError?.includes("Reconnect from Settings.") ?? false;
+  }, [connectionContext?.lastError]);
 
   useEffect(() => {
     if (!isModalOpen || effectiveConnectionStatus !== "CONNECTED") {
@@ -510,6 +513,12 @@ export function WhatsAppConnectionSettings() {
 
     try {
       const context = await loadConnectionContext({ refresh: true });
+      if (context?.lastError?.includes("Reconnect from Settings.")) {
+        setInfo("Status refreshed. Session lama sudah dibersihkan dan perlu dipair ulang.");
+        showActionPopup("Reconnect Required", "Session WhatsApp lama tidak valid. Silakan reconnect dari Settings.", "info");
+        return;
+      }
+
       if (context?.connectionStatus === "CONNECTED" || context?.connectedAccount) {
         setInfo("Status refreshed. WhatsApp session is online.");
         showActionPopup("Status Refreshed", "Koneksi WhatsApp aktif dan siap dicek ulang.", "success");
@@ -670,7 +679,7 @@ export function WhatsAppConnectionSettings() {
                 ) : null}
                 {effectiveConnectionStatus === "DISCONNECTED" ? (
                   <Button size="sm" variant="secondary" className="rounded-xl h-8 text-[13px]" onClick={() => void handleOpenModal()} disabled={isRequestingConnect}>
-                    Reconnect
+                    {requiresReconnect ? "Pair Ulang" : "Reconnect"}
                   </Button>
                 ) : null}
               </div>
@@ -697,9 +706,20 @@ export function WhatsAppConnectionSettings() {
             </div>
 
             {connectionContext?.lastError ? (
-              <p className="mt-5 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-[13px] font-medium text-destructive shadow-sm">
-                {connectionContext.lastError}
-              </p>
+              <div
+                className={`mt-5 rounded-xl px-4 py-3 text-[13px] font-medium shadow-sm ${
+                  requiresReconnect
+                    ? "border border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                    : "border border-destructive/20 bg-destructive/10 text-destructive"
+                }`}
+              >
+                <p>{connectionContext.lastError}</p>
+                {requiresReconnect ? (
+                  <p className="mt-1.5 text-[12px] font-medium text-amber-700/90 dark:text-amber-300/90">
+                    Session lama sudah tidak bisa dipakai. Gunakan QR atau Auth Code untuk menautkan ulang perangkat.
+                  </p>
+                ) : null}
+              </div>
             ) : null}
           </div>
         </div>
@@ -738,6 +758,8 @@ export function WhatsAppConnectionSettings() {
                 ? "Perangkat sudah online. Anda bisa refresh status sekali lalu kirim pesan uji."
                 : effectiveConnectionStatus === "PAIRING"
                   ? "WhatsApp masih menyelesaikan pairing. Tunggu status berubah menjadi Connected."
+                  : requiresReconnect
+                    ? "Session lama sudah invalid dan telah dibersihkan. Lakukan pair ulang dari Settings sebelum verifikasi."
                   : connectionContext?.connectedAccount
                     ? "Nomor sudah tertaut, tetapi socket sedang tertutup. Klik Refresh Status atau Reconnect WhatsApp."
                     : "Hubungkan perangkat WhatsApp terlebih dahulu sebelum verifikasi."}

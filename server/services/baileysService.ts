@@ -321,7 +321,11 @@ async function hasUsableStoredAuth(orgId: string): Promise<boolean> {
   }
 }
 
-async function markStoredAuthAsDisconnected(orgId: string, reason: string): Promise<void> {
+async function markStoredAuthAsDisconnected(
+  orgId: string,
+  reason: string,
+  options?: { clearRuntimeFiles?: boolean }
+): Promise<void> {
   const entry = getSessionEntry(orgId);
   entry.socket = null;
   entry.initPromise = null;
@@ -335,6 +339,28 @@ async function markStoredAuthAsDisconnected(orgId: string, reason: string): Prom
   entry.pairingCode = null;
   entry.pairingCodeExpiresAt = null;
   await clearConnectedAccount(orgId);
+  if (options?.clearRuntimeFiles) {
+    await clearRuntimeFiles(orgId);
+  }
+}
+
+async function pruneInvalidStoredAuth(): Promise<void> {
+  try {
+    const entries = await readdir(BAILEYS_AUTH_DIR, { withFileTypes: true });
+    await Promise.all(
+      entries
+        .filter((entry) => entry.isDirectory())
+        .map(async (entry) => {
+          if (await hasUsableStoredAuth(entry.name)) {
+            return;
+          }
+
+          await clearRuntimeFiles(entry.name);
+        })
+    );
+  } catch {
+    // Ignore runtime cleanup failures; reconnect flow can still recover per org.
+  }
 }
 
 async function bootstrapConnectedBaileysSessions(): Promise<void> {
@@ -344,6 +370,7 @@ async function bootstrapConnectedBaileysSessions(): Promise<void> {
   globalThis.__twentyByteBaileysBootstrapStarted = true;
 
   try {
+    await pruneInvalidStoredAuth();
     const accounts = await prisma.waAccount.findMany({
       where: {
         metaBusinessId: "baileys",
@@ -361,7 +388,8 @@ async function bootstrapConnectedBaileysSessions(): Promise<void> {
           if (!(await hasUsableStoredAuth(orgId))) {
             await markStoredAuthAsDisconnected(
               orgId,
-              "Stored WhatsApp credentials are missing or invalid. Reconnect from Settings."
+              "Stored WhatsApp credentials are missing or invalid. Reconnect from Settings.",
+              { clearRuntimeFiles: true }
             );
             return;
           }
@@ -1408,12 +1436,21 @@ export async function getBaileysConnectionContext(
   }
 
   await requireSettingsAccess(actorUserId, normalizedOrgId);
+  if (options?.refresh && !(await hasUsableStoredAuth(normalizedOrgId))) {
+    await markStoredAuthAsDisconnected(
+      normalizedOrgId,
+      "Stored WhatsApp credentials are missing or invalid. Reconnect from Settings.",
+      { clearRuntimeFiles: true }
+    );
+  }
+
   const connectedAccount = await getConnectedAccount(normalizedOrgId);
   if (options?.refresh && connectedAccount) {
     if (!(await hasUsableStoredAuth(normalizedOrgId))) {
       await markStoredAuthAsDisconnected(
         normalizedOrgId,
-        "Stored WhatsApp credentials are missing or invalid. Reconnect from Settings."
+        "Stored WhatsApp credentials are missing or invalid. Reconnect from Settings.",
+        { clearRuntimeFiles: true }
       );
     } else {
       try {
