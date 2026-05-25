@@ -49,6 +49,7 @@ COPY --from=builder /app/middleware.ts ./middleware.ts
 COPY --from=builder /app/next-env.d.ts ./next-env.d.ts
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
+COPY --from=builder /app/scripts/run-with-local-env.mjs ./scripts/run-with-local-env.mjs
 
 RUN mkdir -p /app/.runtime/baileys-auth /app/.runtime/baileys-media
 RUN chmod +x /app/scripts/docker-entrypoint.sh
