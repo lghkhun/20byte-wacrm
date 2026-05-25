@@ -19,6 +19,14 @@ SKIP_GIT_SYNC="${SKIP_GIT_SYNC:-0}"
 KEEP_OLD_WEB="${KEEP_OLD_WEB:-0}"
 DOCKER_PRUNE_AFTER_DEPLOY="${DOCKER_PRUNE_AFTER_DEPLOY:-1}"
 DEPLOY_GIT_HARD_SYNC="${DEPLOY_GIT_HARD_SYNC:-0}"
+DEPLOY_GIT_AUTO_STASH="${DEPLOY_GIT_AUTO_STASH:-0}"
+APP_IMAGE="${APP_IMAGE:-20byte-vps-app:latest}"
+DEFAULT_APP_IMAGE="20byte-vps-app:latest"
+GHCR_REGISTRY="${GHCR_REGISTRY:-ghcr.io}"
+GHCR_USERNAME="${GHCR_USERNAME:-}"
+GHCR_TOKEN="${GHCR_TOKEN:-}"
+
+export APP_IMAGE
 
 active_color="legacy"
 switched_upstream="0"
@@ -40,6 +48,28 @@ require_file() {
     echo "[deploy] missing required file: $1"
     exit 1
   fi
+}
+
+login_registry_if_needed() {
+  if [ -z "$GHCR_USERNAME" ] || [ -z "$GHCR_TOKEN" ]; then
+    echo "[deploy] registry credentials not provided, skipping docker login"
+    return 0
+  fi
+
+  echo "[deploy] logging into $GHCR_REGISTRY for image pull"
+  printf '%s' "$GHCR_TOKEN" | as_root "$DOCKER_BIN" login "$GHCR_REGISTRY" -u "$GHCR_USERNAME" --password-stdin >/dev/null
+}
+
+prepare_application_image() {
+  if [ "$APP_IMAGE" = "$DEFAULT_APP_IMAGE" ]; then
+    echo "[deploy] APP_IMAGE not provided, fallback to local VPS build"
+    compose build app-image
+    return 0
+  fi
+
+  login_registry_if_needed
+  echo "[deploy] pulling application image $APP_IMAGE"
+  compose pull migrate worker web-blue web-green
 }
 
 detect_active_color() {
@@ -167,6 +197,11 @@ if [ "$SKIP_GIT_SYNC" != "1" ]; then
     git reset --hard "origin/$BRANCH"
     git clean -fd
   else
+    if [ "$DEPLOY_GIT_AUTO_STASH" = "1" ] && [ -n "$(git status --porcelain)" ]; then
+      stash_name="pre-deploy-auto-$(date +%Y%m%d%H%M%S)"
+      echo "[deploy] dirty working tree detected, auto-stashing as $stash_name"
+      git stash push --include-untracked -m "$stash_name" >/dev/null
+    fi
     git checkout "$BRANCH"
     git merge --ff-only "origin/$BRANCH"
   fi
@@ -183,8 +218,8 @@ inactive_service="web-$inactive_color"
 echo "[deploy] active color: $active_color"
 echo "[deploy] inactive color: $inactive_color ($inactive_port)"
 
-echo "[deploy] building application images..."
-compose build app-image
+echo "[deploy] preparing application image..."
+prepare_application_image
 
 echo "[deploy] running database migrations..."
 compose run --rm migrate
