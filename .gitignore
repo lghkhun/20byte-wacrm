@@ -11,3 +11,12 @@ coverage
 # Sensitive runtime/artifacts
 .playwright-cli/
 .runtime/
+
+# Build & test artifacts
+output/
+.mimocode/
+developer-docs/build/
+developer-docs/.docusaurus/
+developer-docs/node_modules/
+playwright-cli.json
+*.log

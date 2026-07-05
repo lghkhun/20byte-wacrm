@@ -23,12 +23,6 @@ npm run db:push
 npm run db:studio
 ```
 
-## Seed AI Automation Akun Khun
-```bash
-npm run db:migrate:vps
-npm run db:seed:ai-khun
-```
-
 ## Catatan Tunnel (wajib)
 - `tunnel:vps` sekarang pakai forward eksplisit:
   - `127.0.0.1:3307 -> VPS 127.0.0.1:3307` (MySQL)
@@ -186,7 +180,7 @@ curl -sS -X POST "$BASE_URL/api/whatsapp/broadcasts" \
   -H "Cookie: $COOKIE" \
   -d "{
     \"orgId\": \"$ORG_ID\",
-    \"name\": \"Promo Mei\",
+    \"name\": \"Promo\",
     \"messageMode\": \"TEMPLATE\",
     \"templateName\": \"promo_template\",
     \"templateLanguageCode\": \"id\",

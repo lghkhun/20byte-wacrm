@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { errorResponse, successResponse } from "@/lib/api/http";
 import { getActiveOrgIdFromRequest } from "@/lib/auth/activeOrg";
 import { requireApiSession } from "@/lib/auth/middleware";
+import { isBillingDisabled } from "@/lib/env";
 import { isPrismaDatabaseUnavailableError } from "@/lib/db/prismaError";
 import { getPrimaryOrganizationForUser } from "@/server/services/organizationService";
 import { getOrgSubscriptionView } from "@/server/services/billingService";
@@ -52,6 +53,15 @@ export async function GET(request: NextRequest) {
   const auth = requireApiSession(request);
   if (auth.response) {
     return auth.response;
+  }
+
+  if (isBillingDisabled()) {
+    return successResponse({
+      subscription: { status: "ACTIVE", currentPeriodEndAt: "2099-01-01T00:00:00.000Z" },
+      state: { isLocked: false, graceEndAt: null },
+      pricing: { plans: [], defaultPlanMonths: 1, renewalDays: 28, currency: "IDR" },
+      reminder: null
+    }, 200);
   }
 
   const orgIdInput = request.nextUrl.searchParams.get("orgId")?.trim() ?? "";

@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { BillingChargeStatus, Prisma, Role, SubscriptionStatus } from "@prisma/client";
 
-import { getLouvinConfig } from "@/lib/env";
+import { getLouvinConfig, isBillingDisabled } from "@/lib/env";
 import { prisma } from "@/lib/db/prisma";
 import { acquireIdempotencyLock } from "@/lib/redis/idempotency";
 import { isLikelyQrisPayload } from "@/lib/payment/checkoutFallback";
@@ -696,6 +696,10 @@ export async function getOrgSubscriptionView(actorUserId: string, orgIdInput: st
 }
 
 export async function assertOrgBillingAccess(orgIdInput: string, mode: "read" | "write" = "write"): Promise<void> {
+  if (isBillingDisabled()) {
+    return;
+  }
+
   const orgId = normalize(orgIdInput);
   if (!orgId) {
     throw new ServiceError(400, "MISSING_ORG_ID", "orgId is required.");
