@@ -33,6 +33,49 @@ type OptionalEnvKey =
   | "SUPERADMIN_EMAILS"
   | "DISABLE_BILLING";
 
+export type AppEnv = Record<RequiredEnvKey, string> &
+  Partial<Record<OptionalEnvKey, string>> & {
+    MYSQL_PORT: string;
+    REDIS_PORT: string;
+  };
+
+const REQUIRED_ENV_KEYS: RequiredEnvKey[] = [
+  "DATABASE_URL",
+  "REDIS_URL",
+  "NEXTAUTH_SECRET",
+  "NEXTAUTH_URL",
+  "APP_URL"
+];
+
+const OPTIONAL_ENV_KEYS: OptionalEnvKey[] = [
+  "MYSQL_PORT",
+  "REDIS_PORT",
+  "ABLY_API_KEY",
+  "SHORTLINK_BASE_URL",
+  "RESEND_API_KEY",
+  "RESEND_FROM_EMAIL",
+  "RESEND_REPLY_TO_EMAIL",
+  "R2_ACCOUNT_ID",
+  "R2_ACCESS_KEY_ID",
+  "R2_SECRET_ACCESS_KEY",
+  "R2_BUCKET",
+  "R2_PUBLIC_URL",
+  "WHATSAPP_MOCK_MODE",
+  "PAKASIR_PROJECT_SLUG",
+  "PAKASIR_API_KEY",
+  "PAKASIR_BASE_URL",
+  "PAKASIR_DEFAULT_METHOD",
+  "PAKASIR_WEBHOOK_PATH",
+  "PAKASIR_WEBHOOK_TOKEN",
+  "LOUVIN_API_KEY",
+  "LOUVIN_BASE_URL",
+  "LOUVIN_DEFAULT_METHOD",
+  "LOUVIN_WEBHOOK_PATH",
+  "LOUVIN_WEBHOOK_TOKEN",
+  "SUPERADMIN_EMAILS",
+  "DISABLE_BILLING"
+];
+
 export function isBillingDisabled(): boolean {
   return process.env.DISABLE_BILLING === "true";
 }
