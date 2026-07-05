@@ -156,6 +156,22 @@ export default function HomePage() {
             <span className="hidden opacity-50 sm:block">•</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-primary" /> Batalkan kapan saja</span>
           </p>
+
+          <a
+            href="https://www.producthunt.com/products/20byte-crm?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-20byte-crm"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="reveal mt-8 inline-block transition-opacity hover:opacity-90"
+          >
+            {/* Product Hunt serves this badge as an external SVG widget. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt="20byte CRM - WhatsApp CRM + Meta Ads Attribution | Product Hunt"
+              width="250"
+              height="54"
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1188122&theme=light&t=1783221935246"
+            />
+          </a>
         </div>
 
         {/* scroll prompt */}
